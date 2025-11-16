@@ -1,41 +1,50 @@
 <?php
 session_start();
 
-// Security Check: Siguraduhing admin lang ang pwedeng mag-delete
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    // Kung hindi admin, huwag ituloy
-    http_response_code(403); // Forbidden
-    $_SESSION['message'] = "Error: Unauthorized access.";
-    header('Location: dashboard.php');
-    exit;
-}
-
-// Kunin ang filename mula sa URL
 if (isset($_GET['file'])) {
-    // Gumamit ng basename() para sa security, para maiwasan ang directory traversal attacks
-    $filename = basename($_GET['file']); 
+    $filename_png = basename($_GET['file']); // e.g., "photo-123.png"
     $upload_dir = '../uploads/';
-    $filepath = $upload_dir . $filename;
+    $file_path_png = $upload_dir . $filename_png;
 
-    // I-check kung nage-exist ang file bago burahin
-    if (file_exists($filepath)) {
-        // Burahin ang file
-        if (unlink($filepath)) {
-            // Maglagay ng success message
-            $_SESSION['message'] = "Photo deleted successfully!";
+    // Buuin ang path para sa associated GIF
+    $filename_gif = str_replace(['.png', '.jpg', '.jpeg'], '.gif', $filename_png);
+    $file_path_gif = $upload_dir . $filename_gif;
+
+    $png_deleted = false;
+    $gif_deleted = false; 
+    $error_msg = '';
+
+    // Subukang i-delete ang PNG (Print)
+    if (file_exists($file_path_png)) {
+        if (unlink($file_path_png)) {
+            $png_deleted = true;
         } else {
-            // Maglagay ng error message kung pumalya ang pag-delete
-            $_SESSION['message'] = "Error: Could not delete the photo.";
+            $error_msg .= 'Could not delete main photo. ';
         }
     } else {
-        // Maglagay ng error message kung hindi mahanap ang file
-        $_SESSION['message'] = "Error: File not found.";
+        $error_msg .= 'Main photo not found. ';
     }
+
+    // Subukang i-delete ang GIF (Boomerang)
+    if (file_exists($file_path_gif)) {
+        if (unlink($file_path_gif)) {
+            $gif_deleted = true;
+        } else {
+            $error_msg .= 'Could not delete associated GIF. ';
+        }
+    }
+
+    if ($png_deleted) {
+        $message = $gif_deleted ? 'Photo & associated GIF deleted.' : 'Photo deleted.';
+        $_SESSION['alert'] = ['type' => 'success', 'message' => $message];
+    } else {
+        $_SESSION['alert'] = ['type' => 'error', 'message' => $error_msg];
+    }
+
 } else {
-    $_SESSION['message'] = "Error: No file specified to delete.";
+    $_SESSION['alert'] = ['type' => 'error', 'message' => 'No file specified.'];
 }
 
-// Pagkatapos ng proseso, ibalik sa dashboard
 header('Location: dashboard.php');
 exit;
 ?>

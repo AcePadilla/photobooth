@@ -1,6 +1,6 @@
 <?php
 // Folder kung saan ise-save ang mga images
-$upload_dir = "uploads/";
+$upload_dir = "../uploads/";
 
 // Kunin ang image data na pinadala via POST
 $img_data = $_POST['imageData'];

@@ -1,42 +1,62 @@
 <?php
-session_start();
+date_default_timezone_set('Asia/Manila');
 header('Content-Type: application/json');
+$baseDir = 'templates/';
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+function send_response($status, $message, $data = []) {
+    echo json_encode(['status' => $status, 'message' => $message, 'data' => $data]);
     exit;
 }
 
-$response = [];
-$frame_dir = "../frames/";
-
-if (isset($_POST['imageData']) && isset($_POST['filename']) && isset($_POST['layout_type'])) {
-    $img_data = $_POST['imageData'];
-    $layout_type = basename($_POST['layout_type']); // e.g., 'strip-3' or 'custom'
-    
-    $base_filename = preg_replace('/[^A-Za-z0-9_\-]/', '', $_POST['filename']);
-    // Add the correct prefix based on the layout type
-    $filename = $layout_type . '_' . $base_filename . '.png';
-
-    if (empty($base_filename)) {
-         $response = ['status' => 'error', 'message' => 'Invalid filename.'];
-    } else {
-        $img_data = str_replace('data:image/png;base64,', '', $img_data);
-        $img_data = str_replace(' ', '+', $img_data);
-        $decoded_data = base64_decode($img_data);
-        $file_path = $frame_dir . $filename;
-        
-        if (file_exists($file_path)) {
-            $response = ['status' => 'error', 'message' => 'A template with this name already exists.'];
-        } elseif (file_put_contents($file_path, $decoded_data)) {
-            $response = ['status' => 'success', 'message' => 'Template saved successfully.'];
-        } else {
-            $response = ['status' => 'error', 'message' => 'Failed to save file.'];
-        }
-    }
-} else {
-    $response = ['status' => 'error', 'message' => 'Missing data.'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    send_response('error', 'Invalid request method.');
 }
 
-echo json_encode($response);
+if (!isset($_POST['filename']) || !isset($_POST['json_data']) || !isset($_POST['image_data'])) {
+    send_response('error', 'Missing required data.');
+}
+
+$filename = $_POST['filename'];
+$jsonData = $_POST['json_data'];
+$imageData = $_POST['image_data'];
+
+if (empty(trim($filename))) {
+    send_response('error', 'Filename cannot be empty.');
+}
+
+$safeFilename = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $filename);
+
+if (strpos($safeFilename, '..') !== false) {
+    send_response('error', 'Invalid filename.');
+}
+
+if (empty($safeFilename)) {
+    send_response('error', 'Invalid filename provided.');
+}
+
+if (!is_dir($baseDir) && !mkdir($baseDir, 0775, true)) {
+    send_response('error', "Failed to create directory: {$baseDir}");
+}
+
+$jsonFilePath = $baseDir . $safeFilename . '.json';
+$pngFilePath = $baseDir . $safeFilename . '.png';
+
+if (file_put_contents($jsonFilePath, $jsonData) === false) {
+    send_response('error', "Failed to save template data to {$jsonFilePath}. Check permissions.");
+}
+
+$imageData = str_replace('data:image/png;base64,', '', $imageData);
+$imageData = str_replace(' ', '+', $imageData);
+$decodedImage = base64_decode($imageData);
+
+if ($decodedImage === false) {
+    send_response('error', 'Failed to decode image data.');
+}
+
+if (file_put_contents($pngFilePath, $decodedImage) === false) {
+    unlink($jsonFilePath); 
+    send_response('error', "Failed to save template preview to {$pngFilePath}. Check permissions.");
+}
+
+send_response('success', "Template '{$safeFilename}' saved successfully!");
 ?>
