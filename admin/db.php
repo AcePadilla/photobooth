@@ -17,6 +17,6 @@ try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 } catch (\PDOException $e) {
     http_response_code(503);
-    die("Can't connect to the database contact Ace Padilla.");
+    die("Can't connect to the database please contact Ace Padilla.");
 }
 ?>

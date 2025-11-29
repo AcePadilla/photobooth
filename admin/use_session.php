@@ -1,56 +1,39 @@
 <?php
 // admin/use_session.php
-require_once 'session_config.php'; // Para makuha ang SESSION_FILE path
 
-// 1. Suriin kung ang request ay POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Method Not Allowed
-    echo 'Error: Invalid request method.';
-    exit;
-}
+require_once 'session_config.php'; // Security check
 
-// 2. Suriin kung may ipinadalang 'layout'
-$layout_to_use = isset($_POST['layout']) ? $_POST['layout'] : '';
-if (empty($layout_to_use)) {
-    http_response_code(400); // Bad Request
-    echo 'Error: No layout specified.';
-    exit;
-}
+define('SESSION_FILE', 'active_session.json');
 
-// 3. Basahin ang kasalukuyang session file (na may 'file lock')
-$json_content = file_get_contents(SESSION_FILE);
-$session_data = json_decode($json_content, true);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['layout'])) {
+    $layoutToRemove = $_POST['layout'];
 
-if (!is_array($session_data) || !isset($session_data['layouts'])) {
-    http_response_code(500);
-    echo 'Error: Invalid session file structure.';
-    exit;
-}
+    if (file_exists(SESSION_FILE)) {
+        // 1. Kunin ang current data
+        $jsonContent = file_get_contents(SESSION_FILE);
+        $data = json_decode($jsonContent, true);
 
-// 4. Hanapin at alisin ang *isang* kopya ng layout
-$layouts = $session_data['layouts'];
-$found_key = array_search($layout_to_use, $layouts);
+        if (is_array($data) && isset($data['layouts'])) {
+            // 2. Hanapin ang index ng layout na tatanggalin
+            $index = array_search($layoutToRemove, $data['layouts']);
 
-if ($found_key !== false) {
-    // Nahanap! Alisin ito sa array
-    array_splice($layouts, $found_key, 1);
-    
-    // I-update ang session data
-    $session_data['layouts'] = $layouts;
-    
-    // 5. I-save pabalik sa session.json file
-    if (file_put_contents(SESSION_FILE, json_encode($session_data, JSON_PRETTY_PRINT), LOCK_EX)) {
-        // Success!
-        http_response_code(200);
-        echo 'Success: Layout used and session updated.';
+            // 3. Kung nahanap, tanggalin ang ISA lang
+            if ($index !== false) {
+                array_splice($data['layouts'], $index, 1);
+
+                // 4. I-save ulit sa JSON file
+                if (file_put_contents(SESSION_FILE, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX)) {
+                    echo "success";
+                } else {
+                    http_response_code(500);
+                    echo "Error writing file";
+                }
+            } else {
+                echo "Layout not found in queue";
+            }
+        }
     } else {
-        http_response_code(500);
-        echo 'Error: Could not write to session file.';
+        echo "Session file not found";
     }
-} else {
-    // Hindi nahanap (posibleng naubos na pero nag-reload ang user)
-    http_response_code(404);
-    echo 'Warning: Layout not found in active session (already used?).';
 }
-
 ?>

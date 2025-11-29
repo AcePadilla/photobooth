@@ -1,1111 +1,1319 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>point five by marahuyo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>point five by marahuyo</title> <script src="https://cdn.tailwindcss.com"></script> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"> <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<script src="js/qrcode.js"></script>
+<style>
+    /* --- GLOBAL THEME --- */
+    body { 
+        font-family: 'Poppins', sans-serif; 
+        background-color: #050505;
+        background-image: 
+            radial-gradient(circle at 50% 0%, #450a0a 0%, transparent 60%),
+            linear-gradient(0deg, #000000 0%, #1a0505 100%);
+        background-attachment: fixed;
+        overflow-x: hidden;
+    }
+
+    /* --- UTILITIES --- */
+    .font-poppins { font-family: 'Poppins', sans-serif; }
     
-    <script src="js/qrcode.js"></script>
-    <script>var GIF_WORKER_PATH = 'js/gif.worker.js';</script>
-    <script src="js/gif.js"></script>
+    .photobooth-card {
+        background: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        box-shadow: 0 0 40px rgba(220, 38, 38, 0.15);
+        border-radius: 24px;
+    }
 
-    <style>
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #0a0a0a, #2a0101, #5c0000, #2a0101);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .card-bg {
-            background-color: rgba(17, 24, 39, 0.5);
-            backdrop-filter: blur(8px);
-            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
-            background-size: 30px 30px;
-        }
-        .font-brand { font-family: 'Playfair Display', serif; }
-        .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
-        .pop-in { animation: popIn 0.3s ease-out forwards; }
-        .zoom-in { animation: zoomIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .flash { animation: flash 0.3s ease-out; }
-        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+    /* --- ANIMATIONS --- */
+    .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    .zoom-in { animation: zoomIn 0.4s ease-out forwards; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    
+    .flash { animation: flash 0.2s ease-out; }
+    @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+    /* --- BUTTONS --- */
+    .btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 9999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        color: white;
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+        border: 1px solid #ef4444;
+    }
+    .btn-primary:hover {
+        box-shadow: 0 6px 30px rgba(220, 38, 38, 0.6);
+        filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+        background: rgba(255,255,255,0.05);
+        color: #e5e5e5;
+        border: 1px solid #525252;
+    }
+    .btn-secondary:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: #ef4444;
+        color: white;
+    }
+
+    /* --- CHOICE CARDS --- */
+    .btn-choice {
+        transition: all 0.3s ease;
+        border: 2px solid #262626;
+        background: linear-gradient(180deg, #171717 0%, #0a0a0a 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-choice:not(:disabled):hover {
+        transform: translateY(-5px);
+        border-color: #ef4444;
+        box-shadow: 0 10px 30px -5px rgba(220, 38, 38, 0.3);
+    }
+    .btn-choice:not(:disabled):hover .preview-paper { background-color: #ffffff; }
+    .btn-choice:not(:disabled):hover .preview-slot { background-color: #ef4444; }
+    
+    .btn-choice.selected {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-choice:disabled {
+        opacity: 0.4;
+        filter: grayscale(100%);
+        cursor: not-allowed;
+    }
+
+    .preview-paper {
+        background-color: #e5e5e5; 
+        transition: background-color 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .preview-slot {
+        background-color: #262626; 
+        transition: background-color 0.3s;
+    }
+
+    .layout-counter {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #ef4444;
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 99px;
+        padding: 0 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        z-index: 10;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .tab-btn { transition: all 0.2s ease-in-out; }
+    .tab-btn.active {
+        background-color: #ef4444;
+        color: #ffffff;
+        box-shadow: 0 2px 10px rgba(220,38,38,0.4);
+    }
+
+    .loader {
+        border: 6px solid #262626; 
+        border-top: 6px solid #ef4444; 
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head> <body class="text-white min-h-screen font-poppins">
+
+<div id="app-container" class="w-full">
+
+<div id="start-screen" class="flex flex-col items-center justify-center p-4 min-h-screen relative">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-red-900/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-red-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="photobooth-card w-full max-w-5xl p-6 md:p-10 fade-in z-10 flex flex-col items-center">
+        <div class="mb-8 text-center">
+            <img src="public/images/nobglogo.png" alt="point five" class="w-48 md:w-60 mx-auto drop-shadow-lg">
+            <div class="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
+        </div>
         
-        .btn {
-            transition: all 0.2s ease-in-out;
-            border-radius: 9999px;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        .btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #ef4444, #dc2626);
-            color: white;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        .btn-primary:hover {
-            box-shadow: 0 6px 25px rgba(239, 68, 68, 0.5);
-        }
-        .btn-secondary {
-            background-color: transparent;
-            color: #d1d5db;
-            border: 2px solid #4b5563;
-        }
-        .btn-secondary:hover {
-             background-color: #4b5563;
-             color: white;
-        }
-        .btn-choice {
-             transition: all 0.2s ease-in-out;
-             border: 2px solid #4b5563;
-             position: relative;
-        }
-        .btn-choice.selected {
-             border-color: #ef4444;
-             transform: scale(1.05);
-             box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-        }
-        .btn-choice:disabled {
-            opacity: 0.3;
-            filter: grayscale(80%);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .btn-choice:disabled .group-hover\:border-red-400 { border-color: #4b5563; }
-        .btn-choice:disabled .group-hover\:bg-red-500 { background-color: #4b5563; }
-
-        .layout-counter {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: #ef4444;
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transform: scale(0);
-            transition: transform 0.3s ease-out;
-        }
-        .btn-choice:not(:disabled) .layout-counter {
-            transform: scale(1);
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .tab-btn {
-             transition: all 0.2s ease-in-out;
-        }
-        .tab-btn.active {
-            background-color: #DC2626;
-            color: #ffffff;
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-<body class="text-white flex items-center justify-center min-h-screen font-sans overflow-hidden">
-
-    <div id="app-container" class="w-full h-full ">
-
-        <div id="start-screen" class="flex flex-col items-center justify-center p-4 min-h-screen">
-            <div class="card-bg rounded-2xl shadow-2xl p-6 md:p-10 fade-in w-full max-w-6xl">
-                <img src="public/images/nobglogo.png" alt="point five by marahuyo" class="w-64 mb-8">
-                
-                <h2 id="start-title" class="text-2xl font-semibold mb-6 text-gray-200">Loading active session...</h2>
-                <div id="layout-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <button data-layout="strip-3" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-16 h-48 border-2 border-gray-600 group-hover:border-red-400 rounded-md flex flex-col justify-around p-1"><div class="h-1/3 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/3 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/3 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Photo Strip</h3><p class="text-xs sm:text-sm text-gray-400">3 Shots (2x6")</p></div></div></button>
-                    <button data-layout="strip-4" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-16 h-48 border-2 border-gray-600 group-hover:border-red-400 rounded-md flex flex-col justify-around p-1"><div class="h-1/4 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/4 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/4 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/4 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Long Strip</h3><p class="text-xs sm:text-sm text-gray-400">4 Shots (2x8")</p></div></div></button>
-                    <button data-layout="grid-4" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-32 h-48 border-2 border-gray-600 group-hover:border-red-400 rounded-md grid grid-cols-2 grid-rows-2 gap-1 p-1"><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Grid</h3><p class="text-xs sm:text-sm text-gray-400">4R (4x6")</p></div></div></button>
-                    <button data-layout="spotlight-3" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-48 h-32 border-2 border-gray-600 group-hover:border-red-400 rounded-md flex gap-1 p-1"><div class="w-2/3 h-full bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="w-1/3 h-full flex flex-col gap-1"><div class="h-1/2 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="h-1/2 bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Spotlight</h3><p class="text-xs sm:text-sm text-gray-400">3 Shots (6x4")</p></div></div></button>
-                    <button data-layout="grid-6-portrait" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-32 h-48 border-2 border-gray-600 group-hover:border-red-400 rounded-md grid grid-cols-2 grid-rows-3 gap-1 p-1"><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Grid Portrait</h3><p class="text-xs sm:text-sm text-gray-400">6 Shots (4x6")</p></div></div></button>
-                    <button data-layout="grid-6-landscape" class="layout-btn group bg-gray-800 p-4 rounded-lg btn-choice" disabled><div class="layout-counter">0</div><div class="flex flex-col items-center h-full justify-between"><div class="w-48 h-32 border-2 border-gray-600 group-hover:border-red-400 rounded-md grid grid-cols-3 grid-rows-2 gap-1 p-1"><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div><div class="bg-gray-600 group-hover:bg-red-500 rounded-sm"></div></div><div class="mt-4"><h3 class="text-lg sm:text-xl font-semibold">Grid Landscape</h3><p class="text-xs sm:text-sm text-gray-400">6 Shots (6x4")</p></div></div></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="booth-screen" class="hidden flex w-full h-screen bg-gray-900">
-            <div class="flex-grow h-full flex items-center justify-center">
-                <div class="relative w-full h-full">
-                    <video id="camera-feed" class="w-full h-full object-cover" autoplay playsinline muted></video>
-                    <div id="flash-effect" class="absolute inset-0 bg-white opacity-0 pointer-events-none"></div>
-                    <div id="overlay-text" class="absolute inset-0 flex items-center justify-center text-5xl sm:text-7xl md:text-9xl font-bold text-white pointer-events-none" 
-                         style="display:none; text-shadow: 0 0 20px rgba(0,0,0,0.7);">
+        <h2 id="start-title" class="text-xl md:text-2xl font-bold mb-8 text-gray-200 tracking-wide uppercase text-center">
+            Loading active session...
+        </h2>
+        
+        <div id="layout-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+            <button data-layout="strip-3" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-16 h-44 p-1 rounded flex flex-col gap-1 justify-between">
+                        <div class="preview-slot h-1/3 rounded-sm w-full"></div>
+                        <div class="preview-slot h-1/3 rounded-sm w-full"></div>
+                        <div class="preview-slot h-1/3 rounded-sm w-full"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="w-full max-w-xs md:max-w-sm card-bg p-4 flex flex-col no-scrollbar">
-                <div class="flex-shrink-0 flex justify-between items-center pb-3 border-b border-gray-700">
-                    <img src="public/images/nobglogo.png" alt="point five" class="h-10 w-auto">
-
-                    <div id="shot-indicator" class="text-lg font-semibold text-gray-300 h-8"></div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">PHOTO STRIP</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">3 Shots (2x6")</p>
                 </div>
-                
-                <div class="flex flex-col gap-4 flex-grow items-center overflow-y-auto pt-4">
-                    <div id="instructions-text" class="text-amber-300 font-semibold text-lg h-auto text-center"></div>
-                    <div id="booth-controls" class="text-center flex-shrink-0 my-4"></div>
-                
-                    <h3 class="text-lg font-semibold text-gray-300 flex-shrink-0">Live Preview</h3>
-                    <div id="shot-previews-container" class="w-2/3 mx-auto">
-                         <canvas id="live-preview-canvas" class="w-full rounded-lg border-2 border-gray-700"></canvas>
+            </button>
+            
+            <button data-layout="strip-4" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-16 h-44 p-1 rounded flex flex-col gap-1 justify-between">
+                        <div class="preview-slot h-1/4 rounded-sm w-full"></div>
+                        <div class="preview-slot h-1/4 rounded-sm w-full"></div>
+                        <div class="preview-slot h-1/4 rounded-sm w-full"></div>
+                        <div class="preview-slot h-1/4 rounded-sm w-full"></div>
                     </div>
                 </div>
-            </div>
-        </div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">LONG STRIP</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">4 Shots (2x8")</p>
+                </div>
+            </button>
 
-
-        <div id="preview-screen" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex-row items-center justify-center zoom-in">
-            <div id="preview-main-area" class="flex-grow h-full flex flex-col items-center justify-center p-4 md:p-8">
-                 <div class="w-full h-full flex-grow relative">
-                    <div id="print-preview-container" class="w-full h-full flex items-center justify-center"></div>
-                 </div>
-            </div>
-            <div id="preview-controls" class="flex-shrink-0 w-full max-w-xs md:max-w-sm card-bg h-full p-6 flex flex-col justify-center items-center gap-6">
-                 <button id="retake-btn" class="btn btn-secondary py-3 px-6 text-lg w-full inline-flex items-center justify-center gap-2"><span class="material-icons">refresh</span>Retake (1 left)</button>
-                 <button id="confirm-frame-btn" class="btn btn-primary py-3 px-6 text-lg w-full inline-flex items-center justify-center gap-2"><span class="material-icons">check_circle</span>Next: Choose Frame</button>
-            </div>
-        </div>
-
-        <div id="frame-screen" class="hidden flex-col items-center justify-center p-4 min-h-screen">
-             <div class="card-bg rounded-2xl shadow-2xl p-6 md:p-10 fade-in w-full max-w-7xl">
-                 <h2 class="text-2xl font-semibold mb-6 text-gray-200">3. Finalize: Choose Your Frame</h2>
-                 
-                 <div class="flex flex-col md:flex-row gap-8">
-                    <div class="w-full md:w-3/4">
-                         <p class="text-gray-400 mb-6">Select a frame to see a preview. Click "Save" when you're done.</p>
-                         <div id="frame-options-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto no-scrollbar">
-                         </div>
-                         <button id="back-to-preview-btn" class="mt-8 btn btn-secondary py-2 px-6 inline-flex items-center gap-2"><span class="material-icons">arrow_back</span> Back to Preview</button>
+            <button data-layout="grid-4" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-32 h-44 p-1 rounded grid grid-cols-2 grid-rows-2 gap-1">
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
                     </div>
-                    
-                    <div class="w-full md:w-1/4">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-200">Preview</h3>
-                        <div id="frame-preview-container" class="bg-gray-900 rounded-lg p-2">
-                            <canvas id="frame-preview-canvas" class="w-full h-auto rounded-md border-2 border-gray-700"></canvas>
+                </div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">GRID 2x2</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">4R Size (4x6")</p>
+                </div>
+            </button>
+
+            <button data-layout="spotlight-3" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-44 h-32 p-1 rounded flex gap-1">
+                        <div class="preview-slot w-2/3 h-full rounded-sm"></div>
+                        <div class="flex flex-col w-1/3 gap-1">
+                            <div class="preview-slot h-1/2 rounded-sm w-full"></div>
+                            <div class="preview-slot h-1/2 rounded-sm w-full"></div>
                         </div>
-                        <button id="confirm-save-btn" class="btn btn-primary w-full mt-4 py-3 text-lg hidden">
-                            <span class="material-icons">check_circle</span> Save This Photo
-                        </button>
                     </div>
-                 </div>
-             </div>
+                </div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">SPOTLIGHT</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">3 Shots (6x4")</p>
+                </div>
+            </button>
+
+            <button data-layout="grid-6-portrait" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-32 h-44 p-1 rounded grid grid-cols-2 grid-rows-3 gap-1">
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                    </div>
+                </div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">GRID PORTRAIT</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">6 Shots (4x6")</p>
+                </div>
+            </button>
+
+            <button data-layout="grid-6-landscape" class="layout-btn group rounded-2xl p-4 btn-choice flex flex-col items-center text-center h-full" disabled>
+                <div class="layout-counter">0</div>
+                <div class="flex-grow flex items-center justify-center w-full py-4">
+                    <div class="preview-paper w-44 h-32 p-1 rounded grid grid-cols-3 grid-rows-2 gap-1">
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                        <div class="preview-slot rounded-sm w-full h-full"></div>
+                    </div>
+                </div>
+                <div class="mt-4 w-full border-t border-gray-800 pt-3">
+                    <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition-colors">GRID LANDSCAPE</h3>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">6 Shots (6x4")</p>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="booth-screen" class="hidden flex w-full h-screen bg-black">
+    <div id="booth-main-area" class="flex-grow h-full flex items-center justify-center p-4 relative overflow-hidden">
+        <div id="camera-container" class="relative overflow-hidden rounded-xl shadow-2xl border-4 border-red-900 bg-black">
+            <video id="camera-feed" class="w-full h-full object-cover block" autoplay playsinline muted></video>
+            <div id="flash-effect" class="absolute inset-0 bg-white opacity-0 pointer-events-none"></div>
+            <div id="overlay-text" class="absolute inset-0 flex items-center justify-center text-7xl font-black text-white pointer-events-none tracking-tighter" 
+                 style="display:none; text-shadow: 4px 4px 0 #ef4444, 0 0 30px rgba(0,0,0,0.8); z-index: 50;">
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-xs md:max-w-sm photobooth-card border-r-0 border-y-0 border-l border-red-900/30 p-5 flex flex-col no-scrollbar z-10 bg-black/90">
+        <div class="flex-shrink-0 flex justify-between items-center pb-4 border-b border-gray-800">
+            <img src="public/images/nobglogo.png" alt="point five" class="h-8 w-auto opacity-80">
+            <div id="shot-indicator" class="text-sm font-bold text-red-500 uppercase tracking-wider bg-red-900/20 px-3 py-1 rounded-full border border-red-900/50">Ready</div>
         </div>
         
-        <div id="result-screen" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex-row items-center justify-center zoom-in">
-             <div id="result-main-area" class="flex-grow h-full flex flex-col items-center justify-center p-4 md:p-8">
-                <div class="w-full h-full flex-grow relative">
-                    <div id="result-boomerang-container" class="w-full h-full flex items-center justify-center"></div>
-                    <div id="result-print-container" class="hidden w-full h-full items-center justify-center"></div>
-                </div>
+        <div class="flex flex-col gap-6 flex-grow items-center overflow-y-auto pt-6">
+            <div id="instructions-text" class="text-white font-bold text-xl text-center leading-tight"></div>
+            <div id="booth-controls" class="text-center flex-shrink-0 my-2"></div>
+        
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mt-4 flex-shrink-0 w-full text-center border-b border-gray-800 pb-2">Live Preview</h3>
+            
+            <div id="shot-previews-container" class="w-48 mx-auto p-2 bg-gray-900 rounded-lg border border-gray-800 shadow-inner">
+                <canvas id="live-preview-canvas" class="w-full rounded border border-gray-700"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="preview-screen" class="hidden fixed inset-0 bg-black/95 backdrop-blur-xl flex-row items-center justify-center zoom-in">
+    <div id="preview-main-area" class="flex-grow h-full flex flex-col items-center justify-center p-4 md:p-8">
+         <div class="w-full h-full flex-grow relative">
+             <div id="print-preview-container" class="w-full h-full flex items-center justify-center"></div>
+         </div>
+    </div>
+    <div id="preview-controls" class="flex-shrink-0 w-full max-w-xs md:max-w-sm photobooth-card h-full p-8 flex flex-col justify-center items-center gap-6 border-l border-red-900/30 bg-black/90">
+         <h2 class="text-2xl font-bold text-white mb-4 uppercase tracking-wide">Looks Good?</h2>
+         <button id="retake-btn" class="btn btn-secondary py-4 px-6 text-sm w-full inline-flex items-center justify-center gap-2 font-bold uppercase tracking-wide"><span class="material-icons text-base">refresh</span>Retake</button>
+         <button id="confirm-frame-btn" class="btn btn-primary py-4 px-6 text-sm w-full inline-flex items-center justify-center gap-2 font-bold uppercase tracking-wide shadow-lg shadow-red-900/50"><span class="material-icons text-base">arrow_forward</span>Next: Frames</button>
+    </div>
+</div>
+
+<div id="frame-screen" class="hidden flex-col items-center justify-center p-4 min-h-screen">
+     <div class="photobooth-card p-6 md:p-10 fade-in w-full max-w-7xl">
+         <div class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-white uppercase tracking-tight">Select Frame</h2>
+            <button id="back-to-preview-btn" class="text-gray-400 hover:text-white flex items-center gap-2 text-sm font-bold uppercase transition-colors"><span class="material-icons">arrow_back</span> Back</button>
+         </div>
+         
+         <div class="flex flex-col md:flex-row gap-10">
+             <div class="w-full md:w-3/4">
+                  <div id="frame-options-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 w-full h-auto">
+                      </div>
              </div>
              
-             <div id="result-controls" class="flex-shrink-0 w-full max-w-xs md:max-w-sm card-bg h-full p-6 flex flex-col justify-start items-center gap-6 pt-16 overflow-y-auto no-scrollbar">
-                <div class="flex-shrink-0 p-1 bg-gray-800 rounded-full mb-6">
-                    <button id="result-boomerang-tab" class="tab-btn py-2 px-6 font-semibold rounded-full text-sm">Boomerang</button>
-                    <button id="result-print-tab" class="tab-btn py-2 px-6 font-semibold rounded-full text-sm">Print Layout</button>
-                </div>
-
-                <div>
-                    <h2 class="text-2xl font-bold text-green-400 mb-2">Saved Successfully!</h2>
-                    <p class="text-gray-300 mb-4 text-center">Scan the QR code to download your photo.</p>
-                    
-                    <div id="qr-code-container" class="p-2 bg-white rounded-lg w-64 h-64 mx-auto flex items-center justify-center text-black">
-                        ...
-                    </div>
-                    
-                    <p id="saving-status-message" class="mt-3 text-sm h-5 text-center"></p>
-                </div>
-                <button id="next-session-btn" class="btn btn-primary py-4 px-10 text-xl w-full inline-flex items-center justify-center gap-2">
-                    <span class="material-icons">replay</span>Done
-                </button>
+             <div class="w-full md:w-1/4 flex flex-col bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                 <h3 class="text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider text-center">Final Preview</h3>
+                 
+                 <div id="frame-preview-container" class="w-48 mx-auto shadow-2xl shadow-black">
+                     <canvas id="frame-preview-canvas" class="w-full h-auto rounded-sm bg-white"></canvas>
+                 </div>
+                 <button id="confirm-save-btn" class="btn btn-primary w-full mt-6 py-4 text-base font-bold uppercase tracking-wide hidden shadow-lg shadow-red-600/30 hover:shadow-red-600/50">
+                     <span class="material-icons mr-2">print</span> Save
+                 </button>
              </div>
+         </div>
+     </div>
+</div>
+
+<div id="result-screen" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex-row items-center justify-center zoom-in">
+     <div id="result-main-area" class="flex-grow h-full flex flex-col items-center justify-center p-4 md:p-8">
+         <div class="w-full h-full flex-grow relative">
+             <div id="result-boomerang-container" class="w-full h-full flex items-center justify-center"></div>
+             <div id="result-print-container" class="hidden w-full h-full items-center justify-center"></div>
+         </div>
+     </div>
+     
+     <div id="result-controls" class="flex-shrink-0 w-full max-w-xs md:max-w-sm photobooth-card h-full p-6 flex flex-col justify-start items-center gap-6 pt-16 border-l border-red-900/30 bg-black/90">
+         <div class="flex-shrink-0 p-1.5 bg-gray-900 rounded-full mb-4 border border-gray-800">
+             <button id="result-boomerang-tab" class="tab-btn py-2 px-6 font-bold rounded-full text-xs uppercase tracking-wide active">Boomerang</button>
+             <button id="result-print-tab" class="tab-btn py-2 px-6 font-bold rounded-full text-xs uppercase tracking-wide">Photo</button>
+         </div>
+
+         <div class="w-full text-center">
+             <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tight">All Done!</h2>
+             <p class="text-gray-400 text-sm mb-6">Scan to download your memories.</p>
+             
+             <div id="qr-code-container" class="p-3 bg-white rounded-xl w-64 h-64 mx-auto flex items-center justify-center text-black shadow-2xl shadow-white/10">
+                 ...
+             </div>
+             
+             <p id="saving-status-message" class="mt-4 text-xs font-bold text-red-400 uppercase tracking-wider h-5 text-center"></p>
+         </div>
+         <div class="mt-auto w-full">
+            <button id="next-session-btn" class="btn btn-secondary py-4 text-lg w-full inline-flex items-center justify-center gap-2 font-bold uppercase tracking-wider hover:bg-white hover:text-black hover:border-white">
+                <span class="material-icons">home</span> New Session
+            </button>
+         </div>
+     </div>
+</div>
+
+<div id="loading-screen" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4 min-h-screen z-50">
+    <div class="flex flex-col items-center gap-8">
+        <div class="loader"></div>
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-white uppercase tracking-tight mb-2">Processing</h2>
+            <p class="text-sm text-red-400 font-bold uppercase tracking-widest animate-pulse">Please wait a moment generating your QR code</p>
         </div>
-
     </div>
- <button id="fullscreen-btn" title="Toggle Fullscreen" 
-        class="fixed bottom-5 right-5 z-50 p-2 bg-brand-dark-light/70 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:bg-brand-dark-light focus:outline-none focus:ring-2 focus:ring-brand-red backdrop-blur-sm transition-all">
-    <svg id="fullscreen-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m6-5h4m0 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m6 5h4m0 0v-4m0 4l-5-5"></path></svg>
-    <svg id="minimize-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-5 5m0 0v-4m0 4h4m6-10l5-5m0 0v4m0-4h-4m-6 10l5 5m0 0v-4m0 4h-4M10 14l-5 5"></path></svg>
-</button>
-    <canvas id="capture-canvas" class="hidden"></canvas>
-    <canvas id="final-canvas" class="hidden"></canvas>
+</div>
+</div>
+
+<canvas id="capture-canvas" class="hidden"></canvas>
+<canvas id="final-canvas" class="hidden"></canvas>
+<audio id="audio-countdown" src="sounds/countdown.mp4" preload="auto"></audio>
+
+<script>
+    const screens = {
+        start: document.getElementById('start-screen'),
+        frame: document.getElementById('frame-screen'),
+        booth: document.getElementById('booth-screen'),
+        preview: document.getElementById('preview-screen'),
+        result: document.getElementById('result-screen'),
+        loading: document.getElementById('loading-screen'),
+    };
+    const startTitle = document.getElementById('start-title');
+    const layoutButtons = document.querySelectorAll('.layout-btn');
+    const backToPreviewBtn = document.getElementById('back-to-preview-btn');
+    const frameOptionsContainer = document.getElementById('frame-options-container');
+    const boothControls = document.getElementById('booth-controls');
+    const retakeBtn = document.getElementById('retake-btn');
+    const confirmFrameBtn = document.getElementById('confirm-frame-btn'); 
+    const nextSessionBtn = document.getElementById('next-session-btn'); 
+    const video = document.getElementById('camera-feed');
+    const shotIndicator = document.getElementById('shot-indicator');
+    const livePreviewCanvas = document.getElementById('live-preview-canvas');
+    const overlayText = document.getElementById('overlay-text');
+    const flashEffect = document.getElementById('flash-effect');
+    const captureCanvas = document.getElementById('capture-canvas');
+    const finalCanvas = document.getElementById('final-canvas');
+    const resultBoomerangContainer = document.getElementById('result-boomerang-container'); 
+    const printPreviewContainer = document.getElementById('print-preview-container');
+    const instructionsText = document.getElementById('instructions-text');
+    const savingStatusMessage = document.getElementById('saving-status-message');
+    const audioCountdown = document.getElementById('audio-countdown');
+    const framePreviewCanvas = document.getElementById('frame-preview-canvas');
+    const confirmSaveBtn = document.getElementById('confirm-save-btn');
     
-    <audio id="audio-countdown" src="sounds/countdown.mp4" preload="auto"></audio>
-    
-    <script>
-        const screens = {
-            start: document.getElementById('start-screen'),
-            frame: document.getElementById('frame-screen'),
-            booth: document.getElementById('booth-screen'),
-            preview: document.getElementById('preview-screen'),
-            result: document.getElementById('result-screen'),
-        };
-        const startTitle = document.getElementById('start-title');
-        const layoutButtons = document.querySelectorAll('.layout-btn');
-        const backToPreviewBtn = document.getElementById('back-to-preview-btn');
-        const frameOptionsContainer = document.getElementById('frame-options-container');
-        const boothControls = document.getElementById('booth-controls');
-        const retakeBtn = document.getElementById('retake-btn');
-        const confirmFrameBtn = document.getElementById('confirm-frame-btn'); 
-        const nextSessionBtn = document.getElementById('next-session-btn'); 
-        const video = document.getElementById('camera-feed');
-        const shotIndicator = document.getElementById('shot-indicator');
-        const livePreviewCanvas = document.getElementById('live-preview-canvas');
-        const overlayText = document.getElementById('overlay-text');
-        const flashEffect = document.getElementById('flash-effect');
-        const captureCanvas = document.getElementById('capture-canvas');
-        const finalCanvas = document.getElementById('final-canvas');
-        const boomerangPreviewContainer = document.getElementById('boomerang-preview-container');
-        const printPreviewContainer = document.getElementById('print-preview-container');
-        const instructionsText = document.getElementById('instructions-text');
-        const savingStatusMessage = document.getElementById('saving-status-message');
-        const audioCountdown = document.getElementById('audio-countdown');
-        const framePreviewCanvas = document.getElementById('frame-preview-canvas');
-        const confirmSaveBtn = document.getElementById('confirm-save-btn');
-        
-        const resultContainer = document.getElementById('result-main-area'); 
-        const resultBoomerangTab = document.getElementById('result-boomerang-tab');
-        const resultPrintTab = document.getElementById('result-print-tab');
-        const resultBoomerangContainer = document.getElementById('result-boomerang-container');
-        const resultPrintContainer = document.getElementById('result-print-container');
-        const qrCodeContainer = document.getElementById('qr-code-container');
+    const resultContainer = document.getElementById('result-main-area'); 
+    const resultBoomerangTab = document.getElementById('result-boomerang-tab');
+    const resultPrintTab = document.getElementById('result-print-tab');
+    const resultPrintContainer = document.getElementById('result-print-container');
+    const qrCodeContainer = document.getElementById('qr-code-container');
 
-        const layoutConfig = {
-            'strip-3': { shots: 3, w: 2, h: 6, guides: [{ x: 0.04, y: 0.025, w: 0.92, h: 0.275 }, { x: 0.04, y: 0.325, w: 0.92, h: 0.275 }, { x: 0.04, y: 0.625, w: 0.92, h: 0.275 }] },
-            'strip-4': { shots: 4, w: 2, h: 8, guides: [{ x: 0.04, y: 0.02, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.245, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.47, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.695, w: 0.92, h: 0.205 }] },
-            'grid-4': { shots: 4, w: 4, h: 6, guides: [{ x: 0.03, y: 0.03, w: 0.455, h: 0.42 }, { x: 0.515, y: 0.03, w: 0.455, h: 0.42 }, { x: 0.03, y: 0.48, w: 0.455, h: 0.42 }, { x: 0.515, y: 0.48, w: 0.455, h: 0.42 }] },
-            'spotlight-3': { shots: 3, w: 6, h: 4, guides: [{ x: 0.033, y: 0.04, w: 0.6, h: 0.75 }, { x: 0.666, y: 0.04, w: 0.3, h: 0.36 }, { x: 0.666, y: 0.43, w: 0.3, h: 0.36 }] },
-            'grid-6-portrait': { shots: 6, w: 4, h: 6, guides: [ { x: 0.03, y: 0.02, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.02, w: 0.455, h: 0.28 }, { x: 0.03, y: 0.32, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.32, w: 0.455, h: 0.28 }, { x: 0.03, y: 0.62, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.62, w: 0.455, h: 0.28 } ]},
-            'grid-6-landscape': { shots: 6, w: 6, h: 4, guides: [ { x: 0.02, y: 0.04, w: 0.3, h: 0.38 }, { x: 0.34, y: 0.04, w: 0.3, h: 0.38 }, { x: 0.66, y: 0.04, w: 0.3, h: 0.38 }, { x: 0.02, y: 0.46, w: 0.3, h: 0.38 }, { x: 0.34, y: 0.46, w: 0.3, h: 0.38 }, { x: 0.66, y: 0.46, w: 0.3, h: 0.38 } ]},
-        };
+    const shotPreviewsContainer = document.getElementById('shot-previews-container');
+    const framePreviewContainer = document.getElementById('frame-preview-container');
 
-        let appState = {
-            sessionLayouts: [], 
-            currentSessionLayout: null, 
-            layout: null, 
-            frame: null,
-            staticShots: [],
-            staticShotImages: [],
-            boomerangCollections: [],
-            finalImage: null,
-            fileUrl: null, 
-            logoImage: null,
-            animationIntervalId: null,
-            currentShotIndex: 0,
-            frameImage: null,
-            retriesLeft: 1, 
-            frameColor: null, 
-            frameOverlay: null, 
-            frameFilter: null, 
-        };
-        const MAX_RETRIES = 1; 
+    const layoutConfig = {
+        'strip-3': { shots: 3, w: 2, h: 6, guides: [{ x: 0.04, y: 0.025, w: 0.92, h: 0.275 }, { x: 0.04, y: 0.325, w: 0.92, h: 0.275 }, { x: 0.04, y: 0.625, w: 0.92, h: 0.275 }] },
+        'strip-4': { shots: 4, w: 2, h: 8, guides: [{ x: 0.04, y: 0.02, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.245, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.47, w: 0.92, h: 0.205 }, { x: 0.04, y: 0.695, w: 0.92, h: 0.205 }] },
+        'grid-4': { shots: 4, w: 4, h: 6, guides: [{ x: 0.03, y: 0.03, w: 0.455, h: 0.42 }, { x: 0.515, y: 0.03, w: 0.455, h: 0.42 }, { x: 0.03, y: 0.48, w: 0.455, h: 0.42 }, { x: 0.515, y: 0.48, w: 0.455, h: 0.42 }] },
+        'spotlight-3': { shots: 3, w: 6, h: 4, guides: [{ x: 0.033, y: 0.04, w: 0.6, h: 0.75 }, { x: 0.666, y: 0.04, w: 0.3, h: 0.36 }, { x: 0.666, y: 0.43, w: 0.3, h: 0.36 }] },
+        'grid-6-portrait': { shots: 6, w: 4, h: 6, guides: [ { x: 0.03, y: 0.02, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.02, w: 0.455, h: 0.28 }, { x: 0.03, y: 0.32, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.32, w: 0.455, h: 0.28 }, { x: 0.03, y: 0.62, w: 0.455, h: 0.28 }, { x: 0.515, y: 0.62, w: 0.455, h: 0.28 } ]},
+        'grid-6-landscape': { shots: 6, w: 6, h: 4, guides: [ 
+            { x: 0.02, y: 0.04, w: 0.3, h: 0.37 }, { x: 0.34, y: 0.04, w: 0.3, h: 0.37 }, { x: 0.66, y: 0.04, w: 0.3, h: 0.37 }, 
+            { x: 0.02, y: 0.44, w: 0.3, h: 0.37 }, { x: 0.34, y: 0.44, w: 0.3, h: 0.37 }, { x: 0.66, y: 0.44, w: 0.3, h: 0.37 } 
+        ]},
+    };
 
-        function stopAnimation() {
-            if (appState.animationIntervalId) {
-                clearInterval(appState.animationIntervalId);
-                appState.animationIntervalId = null;
-            }
+    let appState = {
+        sessionLayouts: [], 
+        currentSessionLayout: null, 
+        layout: null, 
+        frame: null,
+        staticShots: [],
+        staticShotImages: [],
+        boomerangCollections: [],
+        finalImage: null,
+        fileUrl: null, 
+        videoUrl: null, 
+        localVideoBlobUrl: null, 
+        logoImage: null,
+        currentShotIndex: 0,
+        frameImage: null,
+        retriesLeft: 1, 
+        frameColor: null,
+        frameStyle: 'solid',
+        frameOverlay: null, 
+        frameFilter: null, 
+    };
+    const MAX_RETRIES = 1; 
+
+    let livePreviewLoopId = null; 
+
+    function stopLivePreviewLoop() {
+        if (livePreviewLoopId) {
+            cancelAnimationFrame(livePreviewLoopId);
+            livePreviewLoopId = null;
         }
+    }
 
-        function stopCamera() {
-            stopAnimation();
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-            }
+    function stopCamera() {
+        stopLivePreviewLoop(); 
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
         }
+    }
 
-        async function startCamera() {
-            stopAnimation();
-            try {
-                if (!video.srcObject) {
-                    const videoConstraints = {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        facingMode: 'user'
-                    };
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
-                    video.srcObject = stream;
-                    await video.play();
-                }
-                return true;
-            } catch (err) {
-                console.error("Camera access error (ideal):", err);
-                if (err.name === "OverconstrainedError") {
-                    console.warn("Ideal resolution failed. Trying default camera...");
-                    try {
-                        const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-                        video.srcObject = fallbackStream;
-                        await video.play();
-                        return true;
-                    } catch (fallbackErr) {
-                        console.error("Fallback camera error:", fallbackErr);
-                        alert("Hindi talaga ma-access ang camera. Pakisuri ang iyong settings.");
-                        return false;
-                    }
-                } else if (err.name === "NotAllowedError") {
-                    alert("Kailangan mong payagan ang pag-access sa camera. I-refresh ang page at i-click ang 'Allow'.");
-                } else {
-                    alert("Could not access the camera. Please allow camera permissions.");
-                }
-                return false;
-            }
-        }
-
-        function showScreen(screenName) {
-            Object.values(screens).forEach(s => s.classList.add('hidden'));
-            screens[screenName].classList.remove('hidden');
-            screens[screenName].classList.add('flex'); 
-        }
-
-        async function initializeApp() {
-            showScreen('start');
-            startTitle.textContent = 'Connecting to admin session...';
-            
-            try {
-                const cacheBuster = `?t=${new Date().getTime()}`;
-                const response = await fetch(`admin/get_session.php${cacheBuster}`, {
-                    method: 'GET',
-                    cache: 'no-store', 
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                });
-                
-                if (!response.ok) throw new Error('Could not connect to server');
-                
-                const data = await response.json();
-                appState.sessionLayouts = data.layouts || [];
-                updateStartScreen();
-
-            } catch (error) {
-                console.error('Failed to initialize app:', error);
-                startTitle.textContent = 'Connection Error. Please ask admin for help.';
-            }
-        }
-
-        function updateStartScreen() {
-            const layoutCounts = {};
-            appState.sessionLayouts.forEach(layout => {
-                layoutCounts[layout] = (layoutCounts[layout] || 0) + 1;
-            });
-
-            if (appState.sessionLayouts.length === 0) {
-                startTitle.textContent = 'No active session. Please contact admin.';
-            } else {
-                startTitle.textContent = `Choose your next photo ( ${appState.sessionLayouts.length} left )`;
-            }
-
-            layoutButtons.forEach(button => {
-                const layout = button.dataset.layout;
-                const count = layoutCounts[layout] || 0;
-                const counter = button.querySelector('.layout-counter');
-
-                if (count > 0) {
-                    button.disabled = false;
-                    counter.textContent = count;
-                    counter.style.display = 'flex';
-                } else {
-                    button.disabled = true;
-                    counter.style.display = 'none';
-                }
-            });
-        }
-        
-        function waitForElementVisible(element) {
-            return new Promise(resolve => {
-                if (element.clientWidth > 0 && element.clientHeight > 0) {
-                    return resolve();
-                }
-                const checkVisibility = () => {
-                    if (element.clientWidth > 0 && element.clientHeight > 0) {
-                        resolve();
-                    } else {
-                        requestAnimationFrame(checkVisibility);
-                    }
+    async function startCamera() {
+        stopLivePreviewLoop(); 
+        try {
+            if (!video.srcObject) {
+                const videoConstraints = {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
                 };
-                requestAnimationFrame(checkVisibility);
-            });
-        }
-
-        function loadLogoImage(path) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = (e) => {
-                    console.warn("Failed to load logo: " + path);
-                    resolve(null);
-                };
-                img.src = path;
-            });
-        }
-
-        async function loadFramesForSelection() {
-            frameOptionsContainer.innerHTML = `
-                <button data-frame="black" class="frame-btn group bg-gray-800 p-4 rounded-lg btn-choice flex flex-col items-center justify-center aspect-square relative">
-                    <div class="w-full h-full bg-black border-4 border-gray-500 rounded-md flex items-center justify-center">
-                        <span class="material-icons text-4xl text-white">check_box_outline_blank</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mt-3 absolute bottom-4">Black Frame</h3>
-                </button>
-                <button data-frame="white" class="frame-btn group bg-gray-800 p-4 rounded-lg btn-choice flex flex-col items-center justify-center aspect-square relative">
-                    <div class="w-full h-full bg-white border-4 border-gray-500 rounded-md flex items-center justify-center">
-                        <span class="material-icons text-4xl text-black">check_box_outline_blank</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mt-3 absolute bottom-4 text-black">White Frame</h3>
-                </button>
-                <button data-frame="red" class="frame-btn group bg-gray-800 p-4 rounded-lg btn-choice flex flex-col items-center justify-center aspect-square relative">
-                    <div class="w-full h-full bg-red-600 border-4 border-gray-500 rounded-md flex items-center justify-center">
-                        <span class="material-icons text-4xl text-white">check_box_outline_blank</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mt-3 absolute bottom-4">Red Frame</h3>
-                </button>
-            `;
-            
-            const frameButtons = document.querySelectorAll('.frame-btn');
-            
-            document.querySelectorAll('.frame-btn').forEach(button => {
-                button.addEventListener('click', async () => {
-                    document.querySelectorAll('.frame-btn').forEach(btn => btn.classList.remove('selected'));
-                    button.classList.add('selected');
-                    
-                    const frameType = button.dataset.frame;
-                    appState.frameImage = null; 
-                    appState.frameColor = null; 
-                    appState.frameOverlay = null; 
-                    appState.frameFilter = null; 
-                    appState.logoImage = null; 
-                    
-                    if (frameType === 'black') {
-                        appState.frameColor = '#000000';
-                        appState.logoImage = await loadLogoImage('public/images/blackbg.jpg');
-                    } else if (frameType === 'white') {
-                        appState.frameColor = '#ffffff';
-                        appState.logoImage = await loadLogoImage('public/images/whitebg.jpg');
-                    } else if (frameType === 'red') { 
-                        appState.frameColor = '#dc2626'; 
-                        appState.logoImage = await loadLogoImage('public/images/nobglogo.png');
-                    }
-                    
-                    await updateFramePreview();
-                    confirmSaveBtn.classList.remove('hidden');
-                });
-            });
-
-            showScreen('frame');
-            await waitForElementVisible(framePreviewCanvas.parentElement);
-            await updateFramePreview(); 
-            confirmSaveBtn.classList.add('hidden');
-        }
-       
-        function updateBoothControls(state) {
-            boothControls.innerHTML = '';
-            let button;
-            if (state === 'start') {
-                button = document.createElement('button');
-                button.className = 'btn btn-primary py-3 px-10 text-xl pop-in inline-flex items-center gap-2';
-                button.innerHTML = `<span class="material-icons">camera</span> Start Session`;
-                button.onclick = takeSingleShot;
-            } else if (state === 'next') {
-                button = document.createElement('button');
-                button.className = 'btn btn-primary py-3 px-10 text-xl pop-in bg-green-500 inline-flex items-center gap-2';
-                button.innerHTML = `<span class="material-icons">camera_alt</span> Next Shot`;
-                button.onclick = takeSingleShot;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                video.srcObject = stream;
+                await video.play();
             }
-            else { 
-                button = document.createElement('button');
-                button.className = 'btn btn-primary py-3 px-10 text-xl opacity-75 cursor-not-allowed';
-                button.innerText = 'Processing...';
-                button.disabled = true;
-            }
-            if (button) boothControls.appendChild(button);
-        }
-
-        async function setupBooth() {
-            appState.currentShotIndex = 0;
-            appState.staticShots = [];
-            appState.staticShotImages = [];
-            appState.boomerangCollections = [];
-            appState.frame = null;
-            appState.frameImage = null;
-            appState.frameColor = null; 
-            appState.frameOverlay = null; 
-            appState.frameFilter = null;
-            appState.logoImage = null;
-            
-            if (!await startCamera()) { 
-                initializeApp(); 
-                return; 
-            }
-
-            showScreen('booth');
-            await waitForElementVisible(livePreviewCanvas.parentElement); 
-
-            drawLivePreview();
-            updateShotIndicator(0);
-            updateBoothControls('start');
-            instructionsText.textContent = 'Press Start to begin!';
-            
-            retakeBtn.disabled = (appState.retriesLeft <= 0);
-            retakeBtn.innerHTML = `<span class="material-icons">refresh</span>Retake (${appState.retriesLeft} left)`;
-        }
-
-        function drawLivePreview() {
-            const config = layoutConfig[appState.layout];
-            if (!config) {
-                console.error("Invalid layout config for:", appState.layout);
-                return;
-            }
-            const ctx = livePreviewCanvas.getContext('2d');
-            const parentWidth = livePreviewCanvas.parentElement.clientWidth;
-            
-            if (parentWidth === 0) { 
-                 setTimeout(drawLivePreview, 100);
-                 return;
-            }
-
-            const canvasW = parentWidth;
-            const canvasH = parentWidth / (config.w / config.h);
-            livePreviewCanvas.width = canvasW * 2;
-            livePreviewCanvas.height = canvasH * 2;
-            livePreviewCanvas.style.height = `${canvasH}px`; 
-            livePreviewCanvas.style.width = `${canvasW}px`;
-            
-            ctx.fillStyle = '#1f2937';
-            ctx.fillRect(0,0, livePreviewCanvas.width, livePreviewCanvas.height);
-
-            config.guides.forEach((g, i) => {
-                 if (!appState.staticShotImages[i]) {
-                     ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-                     ctx.fillRect(livePreviewCanvas.width * g.x, livePreviewCanvas.height * g.y, livePreviewCanvas.width * g.w, livePreviewCanvas.height * g.h);
-                     if (i === appState.currentShotIndex) {
-                         ctx.strokeStyle = '#ef4444';
-                         ctx.lineWidth = 4;
-                         ctx.strokeRect(livePreviewCanvas.width * g.x, livePreviewCanvas.height * g.y, livePreviewCanvas.width * g.w, livePreviewCanvas.height * g.h);
-                     }
-                 }
-            });
-
-            appState.staticShotImages.forEach((img, i) => {
-                const g = config.guides[i];
-                if(g) drawImageCropped(ctx, img, livePreviewCanvas.width * g.x, livePreviewCanvas.height * g.y, livePreviewCanvas.width * g.w, livePreviewCanvas.height * g.h);
-            });
-
-            if (appState.frameImage) {
-                ctx.drawImage(appState.frameImage, 0, 0, livePreviewCanvas.width, livePreviewCanvas.height);
-            }
-        }
-
-        function updateShotIndicator(index) {
-            const totalShots = layoutConfig[appState.layout].shots;
-            if (index < totalShots) {
-                shotIndicator.textContent = `Shot ${index + 1} of ${totalShots}`;
-            } else {
-                shotIndicator.textContent = 'All shots taken!';
-            }
-        }
-
-        function showOverlayText(text, duration = 800) {
-            return new Promise(resolve => {
-                overlayText.textContent = text;
-                overlayText.style.display = 'flex';
-                setTimeout(() => {
-                    overlayText.style.display = 'none';
-                    resolve();
-                }, duration);
-            });
-        }
-
-        async function takeSingleShot() {
-            updateBoothControls('processing');
-            instructionsText.textContent = 'Get Ready!';
-            
-            const framesPromise = new Promise(async (resolve) => {
-                const frames = [];
-                const captureInterval = setInterval(() => {
-                    if (video.videoWidth === 0) return; 
-                    captureCanvas.width = video.videoWidth;
-                    captureCanvas.height = video.videoHeight;
-                    const ctx = captureCanvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-                    frames.push(captureCanvas.toDataURL('image/jpeg', 0.4));
-                }, 80); 
-
-                await showOverlayText('Look at the camera!', 1200);
-                
-                audioCountdown.currentTime = 0;
-                audioCountdown.play().catch(e => console.error("Audio play failed:", e)); 
-                
-                await showOverlayText('3', 1000); 
-                await showOverlayText('2', 1000); 
-                await showOverlayText('1', 1000); 
-                
-                await new Promise(r => setTimeout(r, 50)); 
-
-                clearInterval(captureInterval);
-                resolve(frames.slice(-18)); 
-            });
-
-            const frames = await framesPromise;
-            
-            flashEffect.classList.add('flash');
-            setTimeout(() => flashEffect.classList.remove('flash'), 350);
-            
-            appState.boomerangCollections.push(frames);
-            const staticShotDataUrl = frames[frames.length - 1]; 
-            appState.staticShots.push(staticShotDataUrl);
-            appState.staticShotImages.push(await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = staticShotDataUrl; }));
-            
-            appState.currentShotIndex++;
-            drawLivePreview();
-            updateShotIndicator(appState.currentShotIndex-1);
-
-            const totalShots = layoutConfig[appState.layout].shots;
-
-            if (appState.currentShotIndex < totalShots) {
-                updateBoothControls('next');
-                instructionsText.textContent = 'Great shot! Get ready for the next one.';
-                updateShotIndicator(appState.currentShotIndex);
-                drawLivePreview();
-            } else {
-                updateShotIndicator(totalShots);
-                instructionsText.textContent = 'All shots done! Processing...';
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                await showPreviewScreen();
-            }
-        }
-
-
-        function drawImageCropped(ctx, img, dx, dy, dw, dh) {
-            const imgRatio = img.width / img.height;
-            const boxRatio = dw / dh;
-            let sw = img.width, sh = img.height, sx = 0, sy = 0;
-            if (imgRatio > boxRatio) {
-                sw = img.height * boxRatio;
-                sx = (img.width - sw) / 2;
-            } else {
-                sh = img.width / boxRatio;
-                sy = (img.height - sh) / 2;
-            }
-            ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-        }
-
-        async function generateInitialPrintPreview() {
-            const config = layoutConfig[appState.layout];
-            const printCtx = finalCanvas.getContext('2d');
-            const DPI = 300;
-            finalCanvas.width = config.w * DPI;
-            finalCanvas.height = config.h * DPI;
-            printCtx.fillStyle = 'white';
-            printCtx.fillRect(0,0, finalCanvas.width, finalCanvas.height);
-            
-            appState.staticShotImages.forEach((img, i) => {
-                const g = config.guides[i];
-                if(g) drawImageCropped(printCtx, img, finalCanvas.width * g.x, finalCanvas.height * g.y, finalCanvas.width * g.w, finalCanvas.height * g.h);
-            });
-            printPreviewContainer.innerHTML = `<img src="${finalCanvas.toDataURL('image/png')}" alt="Print Preview" class="max-w-full max-h-full object-contain mx-auto rounded-md"/>`;
-        }
-
-        async function showPreviewScreen() {
-            showScreen('preview');
-            await generateInitialPrintPreview();
-            stopCamera();
-        }
-        
-        async function updateFramePreview() {
-            const config = layoutConfig[appState.layout];
-            const ctx = framePreviewCanvas.getContext('2d');
-            
-            const parentWidth = framePreviewCanvas.parentElement.clientWidth;
-            if (parentWidth === 0) {
-                setTimeout(updateFramePreview, 100); 
-                return;
-            }
-            const canvasW = parentWidth;
-            const canvasH = parentWidth / (config.w / config.h);
-            framePreviewCanvas.width = canvasW * 2; 
-            framePreviewCanvas.height = canvasH * 2;
-            framePreviewCanvas.style.height = `${canvasH}px`;
-            
-            if (appState.frameColor) {
-                ctx.fillStyle = appState.frameColor;
-                ctx.fillRect(0, 0, framePreviewCanvas.width, framePreviewCanvas.height);
-            } else {
-                ctx.fillStyle = 'white'; 
-                ctx.fillRect(0, 0, framePreviewCanvas.width, framePreviewCanvas.height);
-            }
-            
-            ctx.filter = appState.frameFilter || 'none';
-            appState.staticShotImages.forEach((img, i) => {
-                const g = config.guides[i];
-                if(g) drawImageCropped(ctx, img, framePreviewCanvas.width * g.x, framePreviewCanvas.height * g.y, framePreviewCanvas.width * g.w, framePreviewCanvas.height * g.h);
-            });
-            ctx.filter = 'none'; 
-            
-            if (appState.frameImage) {
-                ctx.drawImage(appState.frameImage, 0, 0, framePreviewCanvas.width, framePreviewCanvas.height);
-            }
-
-            if (appState.logoImage) {
-                let logoH_percent = 0.08; 
-                let logoY_percent = 0.02; 
-                
-                if (appState.layout === 'spotlight-3' || appState.layout === 'grid-6-landscape') {
-                    logoH_percent = 0.18; 
-                    logoY_percent = 0.01; 
-                }
-
-                const logoH = framePreviewCanvas.height * logoH_percent; 
-                const logoAspect = appState.logoImage.width / appState.logoImage.height;
-                const logoW = logoH * logoAspect;
-                const logoX = (framePreviewCanvas.width - logoW) / 2;
-                const logoY = framePreviewCanvas.height - logoH - (framePreviewCanvas.height * logoY_percent); 
-                
-                ctx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
-            }
-        }
-
-        async function generateAndSaveGIF(baseFilename) {
-            console.log('Starting GIF generation...');
-            savingStatusMessage.textContent = 'Generating GIF...';
-
-            return new Promise(async (resolve, reject) => {
+            return true;
+        } catch (err) {
+            console.error("Camera access error (ideal):", err);
+            if (err.name === "OverconstrainedError") {
+                console.warn("Ideal resolution failed. Trying default camera...");
                 try {
-                    const config = layoutConfig[appState.layout];
-                    
-                    const GIF_WIDTH = 400; 
-                    const GIF_HEIGHT = GIF_WIDTH / (config.w / config.h);
-
-                    const gif = new GIF({
-                        workers: 2,
-                        quality: 10, 
-                        width: GIF_WIDTH,
-                        height: GIF_HEIGHT,
-                        workerScript: 'js/gif.worker.js'
-                    });
-
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = GIF_WIDTH;
-                    tempCanvas.height = GIF_HEIGHT;
-                    const ctx = tempCanvas.getContext('2d');
-
-                    const allFrameImages = await Promise.all(
-                        appState.boomerangCollections.map(collection => 
-                            Promise.all(collection.map(src => new Promise(res => { 
-                                const i = new Image(); 
-                                i.onload = () => res(i); 
-                                i.src = src; 
-                            })))
-                        )
-                    );
-                    
-                    const longestCollectionLength = Math.max(0, ...allFrameImages.map(c => c.length));
-                    if (longestCollectionLength === 0) throw new Error("No frames found for GIF.");
-
-                    let frameSequence = [];
-                    for (let i = 0; i < longestCollectionLength; i++) {
-                        frameSequence.push(i);
-                    }
-                    for (let i = longestCollectionLength - 2; i > 0; i--) {
-                        frameSequence.push(i);
-                    }
-
-                    for (const frameIndex of frameSequence) {
-                        if (appState.frameColor) {
-                            ctx.fillStyle = appState.frameColor;
-                            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                        } else {
-                            ctx.fillStyle = 'white';
-                            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                        }
-                        
-                        ctx.filter = appState.frameFilter || 'none';
-                        
-                        config.guides.forEach((g, i) => {
-                            const currentCollection = allFrameImages[i];
-                            if (currentCollection && currentCollection.length > 0) {
-                                const img = currentCollection[frameIndex % currentCollection.length];
-                                drawImageCropped(ctx, img, tempCanvas.width * g.x, tempCanvas.height * g.y, tempCanvas.width * g.w, tempCanvas.height * g.h);
-                            }
-                        });
-                        ctx.filter = 'none';
-
-                        if (appState.frameImage) {
-                            ctx.drawImage(appState.frameImage, 0, 0, tempCanvas.width, tempCanvas.height);
-                        }
-
-                        if (appState.logoImage) {
-                            let logoH_percent = 0.08; 
-                            let logoY_percent = 0.02;
-                            if (appState.layout === 'spotlight-3' || appState.layout === 'grid-6-landscape') {
-                                logoH_percent = 0.18; 
-                                logoY_percent = 0.01;
-                            }
-                            const logoH = tempCanvas.height * logoH_percent; 
-                            const logoAspect = appState.logoImage.width / appState.logoImage.height;
-                            const logoW = logoH * logoAspect;
-                            const logoX = (tempCanvas.width - logoW) / 2;
-                            const logoY = tempCanvas.height - logoH - (tempCanvas.height * logoY_percent); 
-                            ctx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
-                        }
-
-                        gif.addFrame(ctx, {copy: true, delay: 80});
-                    }
-
-                    gif.on('finished', function(blob) {
-                        console.log('GIF rendering finished. Uploading...');
-                        savingStatusMessage.textContent = 'Uploading GIF...';
-                        
-                        const formData = new FormData();
-                        formData.append('filename', baseFilename); 
-                        formData.append('gifData', blob, 'image.gif');
-
-                        fetch('admin/save_gif.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => {
-                            if (!response.ok) throw new Error('Failed to save GIF on server.');
-                            return response.text();
-                        })
-                        .then(text => {
-                            console.log(text); 
-                            resolve(); 
-                        })
-                        .catch(reject); 
-                    });
-
-                    console.log('Rendering GIF frames...');
-                    savingStatusMessage.textContent = 'Rendering GIF...';
-                    gif.render();
-
-                } catch (err) {
-                    reject(err); 
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                    video.srcObject = fallbackStream;
+                    await video.play();
+                    return true;
+                } catch (fallbackErr) {
+                    console.error("Fallback camera error:", fallbackErr);
+                    alert("Hindi talaga ma-access ang camera. Pakisuri ang iyong settings.");
+                    return false;
                 }
-            });
+            } else if (err.name === "NotAllowedError") {
+                alert("Kailangan mong payagan ang pag-access sa camera. I-refresh ang page at i-click ang 'Allow'.");
+            } else {
+                alert("Could not access the camera. Please allow camera permissions.");
+            }
+            return false;
+        }
+    }
+
+    function updateCameraViewport() {
+        const parent = document.getElementById('booth-main-area');
+        const container = document.getElementById('camera-container');
+        
+        if (!parent || !container) return;
+
+        const config = layoutConfig[appState.layout];
+        const guideIndex = appState.currentShotIndex < config.shots ? appState.currentShotIndex : 0;
+        const guide = config.guides[guideIndex];
+        
+        const targetRatio = (config.w * guide.w) / (config.h * guide.h);
+        const parentW = parent.clientWidth - 32; 
+        const parentH = parent.clientHeight - 32; 
+
+        let newW = parentW;
+        let newH = parentW / targetRatio;
+
+        if (newH > parentH) {
+            newH = parentH;
+            newW = parentH * targetRatio;
         }
 
+        container.style.width = `${newW}px`;
+        container.style.height = `${newH}px`;
+        container.style.aspectRatio = `${targetRatio}`;
+    }
+    
+    window.addEventListener('resize', updateCameraViewport);
 
-        async function generateAndSaveFinalImage() {
-            savingStatusMessage.textContent = 'Generating print file...';
-            qrCodeContainer.innerHTML = 'Saving...';
-            showScreen('result'); 
+    function showScreen(screenName) {
+        Object.values(screens).forEach(s => s.classList.add('hidden'));
+        screens[screenName].classList.remove('hidden');
+        
+        if (screens[screenName].classList.contains('flex-col')) {
+             screens[screenName].classList.add('flex');
+        } else if (screens[screenName].classList.contains('flex-row')) {
+             screens[screenName].classList.add('flex');
+        } else {
+            screens[screenName].classList.add('flex');
+        }
+    }
 
-            await new Promise(resolve => setTimeout(resolve, 100)); 
-
-            const config = layoutConfig[appState.layout];
-            const printCtx = finalCanvas.getContext('2d');
-            const DPI = 300;
-            finalCanvas.width = config.w * DPI;
-            finalCanvas.height = config.h * DPI;
-            
-            if (appState.frameColor) {
-                printCtx.fillStyle = appState.frameColor;
-                printCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-            } else {
-                printCtx.fillStyle = 'white';
-                printCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-            }
-            
-            printCtx.filter = appState.frameFilter || 'none';
-            appState.staticShotImages.forEach((img, i) => {
-                const g = config.guides[i];
-                if(g) drawImageCropped(printCtx, img, finalCanvas.width * g.x, finalCanvas.height * g.y, finalCanvas.width * g.w, finalCanvas.height * g.h);
+    async function initializeApp() {
+        showScreen('start');
+        startTitle.textContent = 'Connecting to admin session...';
+        
+        try {
+            const cacheBuster = `?t=${new Date().getTime()}`;
+            const response = await fetch(`admin/get_session.php${cacheBuster}`, {
+                method: 'GET',
+                cache: 'no-store', 
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
             });
-            printCtx.filter = 'none';
             
-            if (appState.frameImage) {
-                printCtx.drawImage(appState.frameImage, 0, 0, finalCanvas.width, finalCanvas.height);
-            }
+            if (!response.ok) throw new Error('Could not connect to server');
+            
+            const data = await response.json();
+            appState.sessionLayouts = data.layouts || [];
+            updateStartScreen();
 
-            if (appState.logoImage) {
-                let logoH_percent = 0.08; 
-                let logoY_percent = 0.02; 
+        } catch (error) {
+            console.error('Failed to initialize app:', error);
+            startTitle.textContent = 'Connection Error. Please ask admin for help.';
+        }
+    }
+
+    function updateStartScreen() {
+        const layoutCounts = {};
+        appState.sessionLayouts.forEach(layout => {
+            layoutCounts[layout] = (layoutCounts[layout] || 0) + 1;
+        });
+
+        if (appState.sessionLayouts.length === 0) {
+            startTitle.textContent = 'NO ACTIVE SESSION PLEASE CONTACT THE OWNER';
+        } else {
+            startTitle.textContent = `SELECT YOUR LAYOUT (${appState.sessionLayouts.length} AVAILABLE)`;
+        }
+
+        layoutButtons.forEach(button => {
+            const layout = button.dataset.layout;
+            const count = layoutCounts[layout] || 0;
+            const counter = button.querySelector('.layout-counter');
+
+            if (count > 0) {
+                button.disabled = false;
+                counter.textContent = count;
+                counter.style.display = 'flex';
+            } else {
+                button.disabled = true;
+                counter.style.display = 'none';
+            }
+        });
+    }
+    
+    function waitForElementVisible(element) {
+        return new Promise(resolve => {
+            if (element.clientWidth > 0 && element.clientHeight > 0) {
+                return resolve();
+            }
+            const checkVisibility = () => {
+                if (element.clientWidth > 0 && element.clientHeight > 0) {
+                    resolve();
+                } else {
+                    requestAnimationFrame(checkVisibility);
+                }
+            };
+            requestAnimationFrame(checkVisibility);
+        });
+    }
+
+    function loadLogoImage(path) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = (e) => {
+                console.warn("Failed to load logo: " + path);
+                resolve(null);
+            };
+            img.src = path;
+        });
+    }
+
+    function updatePreviewContainerSize() {
+        const smallWidth = 'w-32'; 
+        const largeWidth = 'w-72'; 
+
+        if (appState.layout === 'strip-3' || appState.layout === 'strip-4') {
+            shotPreviewsContainer.classList.remove(largeWidth);
+            framePreviewContainer.classList.remove(largeWidth);
+            shotPreviewsContainer.classList.add(smallWidth);
+            framePreviewContainer.classList.add(smallWidth);
+        } else {
+            shotPreviewsContainer.classList.remove(smallWidth);
+            framePreviewContainer.classList.remove(smallWidth);
+            shotPreviewsContainer.classList.add(largeWidth);
+            framePreviewContainer.classList.add(largeWidth);
+        }
+    }
+
+    async function loadFramesForSelection() {
+        frameOptionsContainer.innerHTML = `
+            <button data-frame="black" data-style="solid" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">dark_mode</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Classic Black</h3>
+            </button>
+
+            <button data-frame="white" data-style="solid" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="w-10 h-10 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-gray-800 text-lg">light_mode</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Classic White</h3>
+            </button>
+
+            <button data-frame="red" data-style="solid" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="w-10 h-10 bg-red-600 border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">palette</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Brand Red</h3>
+            </button>
+            
+             <button data-frame="spotify" data-style="style-spotify" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gray-800 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-black border-2 border-green-500 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-green-500 text-lg">play_circle</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Playlist</h3>
+            </button>
+
+            <button data-frame="instagram" data-style="style-instagram" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-500 opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <div class="w-10 h-10 bg-white border-2 border-purple-500 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-purple-600 text-lg">photo_camera</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Insta Post</h3>
+            </button>
+
+            <button data-frame="polaroid" data-style="style-polaroid" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="w-10 h-10 bg-[#fffbf0] border-2 border-gray-300 rounded-sm flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <div class="w-7 h-7 bg-gray-200 border border-gray-300"></div>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Polaroid</h3>
+            </button>
+
+            <button data-frame="rainbow" data-style="gradient-rainbow" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-green-500 to-blue-500 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">looks</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Rainbow</h3>
+            </button>
+
+            <button data-frame="christmas" data-style="gradient-christmas" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-br from-red-900 to-green-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-green-800 border-2 border-red-500 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">forest</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Christmas</h3>
+            </button>
+
+            <button data-frame="valentine" data-style="gradient-valentine" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-br from-pink-900 to-red-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-pink-600 border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">favorite</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Valentine</h3>
+            </button>
+
+            <button data-frame="easter" data-style="gradient-easter" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-tr from-yellow-900 via-purple-900 to-blue-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-yellow-500 border-2 border-blue-400 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">egg</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Easter</h3>
+            </button>
+
+            <button data-frame="halloween" data-style="gradient-halloween" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-b from-orange-900 to-purple-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-orange-600 border-2 border-purple-700 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">pest_control_rodent</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Halloween</h3>
+            </button>
+
+            <button data-frame="summer" data-style="gradient-summer" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-gradient-to-b from-blue-900 to-yellow-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-blue-500 border-2 border-yellow-400 rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">wb_sunny</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Summer</h3>
+            </button>
+
+            <button data-frame="birthday" data-style="pattern-birthday" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-indigo-900 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-indigo-600 border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">cake</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Birthday</h3>
+            </button>
+
+            <button data-frame="film" data-style="pattern-film" class="frame-btn group bg-gray-900 border border-gray-700 hover:border-red-500 p-3 rounded-xl btn-choice flex flex-col items-center justify-center aspect-square relative overflow-hidden transition-all">
+                <div class="absolute inset-0 bg-black border-x-4 border-dashed border-gray-600 opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div class="w-10 h-10 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center z-10 mb-2 shadow-lg">
+                    <span class="material-icons text-white text-lg">movie</span>
+                </div>
+                <h3 class="text-[10px] md:text-xs font-bold z-10 text-white uppercase tracking-wider">Film Strip</h3>
+            </button>
+        `;
+        
+        document.querySelectorAll('.frame-btn').forEach(button => {
+            button.addEventListener('click', async () => {
+                document.querySelectorAll('.frame-btn').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
                 
-                if (appState.layout === 'spotlight-3' || appState.layout === 'grid-6-landscape') {
-                    logoH_percent = 0.18; 
-                    logoY_percent = 0.01; 
+                const frameType = button.dataset.frame;
+                const frameStyle = button.dataset.style;
+
+                appState.frameImage = null; 
+                appState.frameColor = null; 
+                appState.frameStyle = frameStyle; 
+                appState.logoImage = null; 
+                
+                if (frameType === 'white' || frameType === 'polaroid' || frameType === 'instagram') {
+                    appState.logoImage = await loadLogoImage('public/images/whitebg.jpg');
+                } else if (frameType === 'spotify') {
+                     appState.logoImage = null; 
+                } else {
+                    appState.logoImage = await loadLogoImage('public/images/nobglogo.png');
                 }
 
-                const logoH = finalCanvas.height * logoH_percent; 
-                const logoAspect = appState.logoImage.width / appState.logoImage.height;
-                const logoW = logoH * logoAspect;
-                const logoX = (finalCanvas.width - logoW) / 2;
-                const logoY = finalCanvas.height - logoH - (finalCanvas.height * logoY_percent); 
+                if (frameType === 'black') appState.frameColor = '#000000';
+                else if (frameType === 'white') appState.frameColor = '#ffffff';
+                else if (frameType === 'red') appState.frameColor = '#dc2626';
                 
-                printCtx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
+                await updateFramePreview();
+                confirmSaveBtn.classList.remove('hidden');
+            });
+        });
+
+        showScreen('frame');
+        await waitForElementVisible(framePreviewCanvas.parentElement);
+        
+        updatePreviewContainerSize(); 
+        
+        await updateFramePreview(); 
+        confirmSaveBtn.classList.add('hidden');
+    }
+
+    function drawFrameBackground(ctx, width, height, style, color) {
+        if (style === 'solid') {
+            ctx.fillStyle = color || 'white';
+            ctx.fillRect(0, 0, width, height);
+            return;
+        }
+
+        let gradient;
+        
+        if (style === 'gradient-rainbow') {
+            gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#ff0000');
+            gradient.addColorStop(0.16, '#ff7f00');
+            gradient.addColorStop(0.33, '#ffff00');
+            gradient.addColorStop(0.5, '#00ff00');
+            gradient.addColorStop(0.66, '#0000ff');
+            gradient.addColorStop(0.83, '#4b0082');
+            gradient.addColorStop(1, '#9400d3');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        } else if (style === 'style-polaroid') {
+            ctx.fillStyle = '#fdfbf7'; 
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#efece6';
+            ctx.fillRect(0, height * 0.98, width, height * 0.02); 
+        } else if (style === 'style-spotify') {
+            ctx.fillStyle = '#191414'; 
+            ctx.fillRect(0, 0, width, height);
+            
+            const barY = height * 0.94;
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(width * 0.1, barY, width * 0.8, height * 0.005);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(width * 0.1, barY, width * 0.25, height * 0.005);
+            ctx.beginPath(); ctx.arc(width * 0.35, barY + (height * 0.0025), height * 0.008, 0, Math.PI*2); ctx.fill();
+            
+            const controlsY = height * 0.88;
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(width * 0.5, controlsY, height * 0.03, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath(); ctx.moveTo(width*0.49, controlsY - height*0.01); ctx.lineTo(width*0.515, controlsY); ctx.lineTo(width*0.49, controlsY + height*0.01); ctx.fill();
+            
+            ctx.fillStyle = '#b3b3b3';
+            ctx.beginPath(); ctx.moveTo(width*0.4, controlsY); ctx.lineTo(width*0.42, controlsY - height*0.015); ctx.lineTo(width*0.42, controlsY + height*0.015); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(width*0.6, controlsY); ctx.lineTo(width*0.58, controlsY - height*0.015); ctx.lineTo(width*0.58, controlsY + height*0.015); ctx.fill();
+
+        } else if (style === 'style-instagram') {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.strokeStyle = '#dbdbdb';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, height*0.08); ctx.lineTo(width, height*0.08); ctx.stroke();
+            
+            ctx.fillStyle = '#262626';
+            ctx.beginPath(); ctx.arc(width*0.08, height*0.04, height*0.02, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#efefef';
+            ctx.fillRect(width*0.14, height*0.03, width*0.3, height*0.02);
+            
+            const actionY = height * 0.95;
+            ctx.strokeStyle = '#262626'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(width*0.1, actionY, height*0.015, 0, Math.PI*2); ctx.stroke(); 
+            ctx.beginPath(); ctx.arc(width*0.2, actionY, height*0.015, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(width*0.9, actionY, height*0.015, 0, Math.PI*2); ctx.fill(); 
+
+        } else if (style === 'gradient-christmas') {
+            gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#8f1111'); 
+            gradient.addColorStop(0.5, '#0f3d0f'); 
+            gradient.addColorStop(1, '#8f1111'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+            for(let i=0; i<30; i++) {
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const r = Math.random() * (width * 0.01);
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
             }
 
-            appState.finalImage = finalCanvas.toDataURL('image/png');
-            appState.fileUrl = null; 
-            
-            savingStatusMessage.textContent = 'Saving print file...';
+        } else if (style === 'gradient-valentine') {
+            gradient = ctx.createRadialGradient(width/2, height/2, width/4, width/2, height/2, width);
+            gradient.addColorStop(0, '#ffb7b2'); 
+            gradient.addColorStop(1, '#ff6961'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
 
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+            for(let i=0; i<15; i++) {
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const size = width * 0.02;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.bezierCurveTo(x, y - size/2, x - size, y - size/2, x - size, y);
+                ctx.bezierCurveTo(x - size, y + size, x, y + size*2, x, y + size*2);
+                ctx.bezierCurveTo(x, y + size*2, x + size, y + size, x + size, y);
+                ctx.bezierCurveTo(x + size, y - size/2, x, y - size/2, x, y);
+                ctx.fill();
+            }
+
+        } else if (style === 'gradient-easter') {
+            gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#ffdfba'); 
+            gradient.addColorStop(0.5, '#ffffba'); 
+            gradient.addColorStop(1, '#bae1ff'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            const colors = ['#ffb3ba', '#baffc9', '#bae1ff', '#ffffba'];
+            for(let i=0; i<40; i++) {
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const r = Math.random() * (width * 0.015);
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+        } else if (style === 'gradient-halloween') {
+            gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#ff6600'); 
+            gradient.addColorStop(0.4, '#2e003e'); 
+            gradient.addColorStop(1, '#000000'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0,0); ctx.lineTo(width*0.2, height*0.2);
+            ctx.moveTo(width,0); ctx.lineTo(width*0.8, height*0.2);
+            ctx.stroke();
+
+        } else if (style === 'gradient-summer') {
+            gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#4fc3f7'); 
+            gradient.addColorStop(0.6, '#fff176'); 
+            gradient.addColorStop(1, '#ffcc80'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath(); ctx.arc(width*0.9, height*0.05, width*0.04, 0, Math.PI*2); ctx.fill();
+            
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < width; i+=20) {
+                ctx.moveTo(i, height*0.95);
+                ctx.quadraticCurveTo(i+10, height*0.94, i+20, height*0.95);
+            }
+            ctx.stroke();
+
+        } else if (style === 'pattern-birthday') {
+            ctx.fillStyle = '#283593';
+            ctx.fillRect(0, 0, width, height);
+            
+            const colors = ['#ffeb3b', '#f44336', '#4caf50', '#2196f3'];
+            for(let i=0; i<80; i++) {
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const w = Math.random() * (width * 0.015);
+                const h = Math.random() * (height * 0.01);
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(Math.random() * Math.PI);
+                ctx.fillRect(0, 0, w, h);
+                ctx.restore();
+            }
+
+        } else if (style === 'pattern-film') {
+            ctx.fillStyle = '#111'; 
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#ffffff';
+            const holeSize = width * 0.03; 
+            const spacing = holeSize * 2;
+            
+            for(let y = 0; y < height; y += spacing) {
+                ctx.fillRect(width * 0.01, y, holeSize, holeSize/1.5);
+            }
+            for(let y = 0; y < height; y += spacing) {
+                ctx.fillRect(width - (width*0.01) - holeSize, y, holeSize, holeSize/1.5);
+            }
+        }
+    }
+    
+    function updateBoothControls(state) {
+        boothControls.innerHTML = '';
+        let button;
+        if (state === 'start') {
+            button = document.createElement('button');
+            button.className = 'btn btn-primary py-4 px-12 text-xl pop-in inline-flex items-center gap-3 shadow-lg shadow-red-500/40 font-bold uppercase tracking-wide';
+            button.innerHTML = `<span class="material-icons text-2xl">camera</span> Start Session`;
+            button.onclick = takeSingleShot;
+        } else if (state === 'next') {
+            button = document.createElement('button');
+            button.className = 'btn btn-primary py-4 px-12 text-xl pop-in bg-green-600 inline-flex items-center gap-3 font-bold uppercase tracking-wide';
+            button.innerHTML = `<span class="material-icons text-2xl">camera_alt</span> Next Shot`;
+            button.onclick = takeSingleShot;
+        }
+        else { 
+            button = document.createElement('button');
+            button.className = 'btn btn-primary py-4 px-12 text-xl opacity-50 cursor-not-allowed font-bold uppercase tracking-wide';
+            button.innerText = 'PROCESSING...';
+            button.disabled = true;
+        }
+        if (button) boothControls.appendChild(button);
+    }
+
+    async function setupBooth() {
+        stopLivePreviewLoop(); 
+
+        appState.currentShotIndex = 0;
+        appState.staticShots = [];
+        appState.staticShotImages = [];
+        appState.boomerangCollections = [];
+        appState.frame = null;
+        appState.frameImage = null;
+        appState.frameColor = null; 
+        appState.frameOverlay = null; 
+        appState.frameFilter = null;
+        appState.logoImage = null;
+        appState.videoUrl = null;
+        
+        if (!await startCamera()) { 
+            initializeApp(); 
+            return; 
+        }
+
+        showScreen('booth');
+        
+        updateCameraViewport();
+
+        await waitForElementVisible(livePreviewCanvas.parentElement); 
+
+        updatePreviewContainerSize(); 
+
+        drawLivePreview(); 
+        updateShotIndicator(0);
+        updateBoothControls('start');
+        instructionsText.textContent = 'GET READY TO POSE';
+        
+        retakeBtn.disabled = (appState.retriesLeft <= 0);
+        retakeBtn.innerHTML = `<span class="material-icons">refresh</span>RETAKE (${appState.retriesLeft} LEFT)`;
+    }
+
+    function drawLivePreview() {
+        const config = layoutConfig[appState.layout];
+        if (!config) {
+            console.error("Invalid layout config for:", appState.layout);
+            return;
+        }
+        const ctx = livePreviewCanvas.getContext('2d');
+        const parentWidth = livePreviewCanvas.parentElement.clientWidth;
+        
+        if (parentWidth === 0) { 
+             livePreviewLoopId = requestAnimationFrame(drawLivePreview);
+             return;
+        }
+
+        const canvasW = parentWidth;
+        const canvasH = parentWidth / (config.w / config.h);
+        livePreviewCanvas.width = canvasW * 2;
+        livePreviewCanvas.height = canvasH * 2;
+        livePreviewCanvas.style.height = `${canvasH}px`; 
+        livePreviewCanvas.style.width = `${canvasW}px`;
+        
+        ctx.fillStyle = '#171717';
+        ctx.fillRect(0,0, livePreviewCanvas.width, livePreviewCanvas.height);
+
+        config.guides.forEach((g, i) => {
+             const dx = livePreviewCanvas.width * g.x;
+             const dy = livePreviewCanvas.height * g.y;
+             const dw = livePreviewCanvas.width * g.w;
+             const dh = livePreviewCanvas.height * g.h;
+             
+             if (!appState.staticShotImages[i]) {
+                if (i === appState.currentShotIndex && video.videoWidth > 0 && !video.paused) {
+                    drawImageCropped(ctx, video, dx, dy, dw, dh);
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 8;
+                    ctx.strokeRect(dx, dy, dw, dh);
+                } else {
+                    ctx.fillStyle = "#262626";
+                    ctx.fillRect(dx, dy, dw, dh);
+                }
+             }
+        });
+
+        appState.staticShotImages.forEach((img, i) => {
+            const g = config.guides[i];
+            if(g) drawImageCropped(ctx, img, livePreviewCanvas.width * g.x, livePreviewCanvas.height * g.y, livePreviewCanvas.width * g.w, livePreviewCanvas.height * g.h);
+        });
+
+        if (appState.frameImage) {
+            ctx.drawImage(appState.frameImage, 0, 0, livePreviewCanvas.width, livePreviewCanvas.height);
+        }
+
+        livePreviewLoopId = requestAnimationFrame(drawLivePreview);
+    }
+
+    function updateShotIndicator(index) {
+        const totalShots = layoutConfig[appState.layout].shots;
+        if (index < totalShots) {
+            shotIndicator.textContent = `SHOT ${index + 1} / ${totalShots}`;
+        } else {
+            shotIndicator.textContent = 'SESSION COMPLETE';
+        }
+    }
+
+    function showOverlayText(text, duration = 800) {
+        return new Promise(resolve => {
+            overlayText.textContent = text;
+            overlayText.style.display = 'flex';
+            setTimeout(() => {
+                overlayText.style.display = 'none';
+                resolve();
+            }, duration);
+        });
+    }
+
+    async function takeSingleShot() {
+        updateBoothControls('processing');
+        instructionsText.textContent = 'READY...';
+        
+        const framesPromise = new Promise(async (resolve) => {
+            const frames = [];
+            const captureInterval = setInterval(() => {
+                if (video.videoWidth === 0) return; 
+                captureCanvas.width = video.videoWidth;
+                captureCanvas.height = video.videoHeight;
+                const ctx = captureCanvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                frames.push(captureCanvas.toDataURL('image/jpeg', 0.4));
+            }, 80); 
+
+            await showOverlayText('LOOK AT THE CAMERA!', 1200);
+            
+            audioCountdown.currentTime = 0;
+            audioCountdown.play().catch(e => console.error("Audio play failed:", e)); 
+            
+            await showOverlayText('3', 1000); 
+            await showOverlayText('2', 1000); 
+            await showOverlayText('1', 1000); 
+            
+            await new Promise(r => setTimeout(r, 50)); 
+
+            clearInterval(captureInterval);
+            resolve(frames.slice(-18)); 
+        });
+
+        const frames = await framesPromise;
+        
+        flashEffect.classList.add('flash');
+        setTimeout(() => flashEffect.classList.remove('flash'), 350);
+        
+        appState.boomerangCollections.push(frames);
+        const staticShotDataUrl = frames[frames.length - 1]; 
+        appState.staticShots.push(staticShotDataUrl);
+        appState.staticShotImages.push(await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = staticShotDataUrl; }));
+        
+        appState.currentShotIndex++;
+        updateShotIndicator(appState.currentShotIndex-1);
+
+        const totalShots = layoutConfig[appState.layout].shots;
+
+        if (appState.currentShotIndex < totalShots) {
+            updateBoothControls('next');
+            
+            updateCameraViewport();
+
+            instructionsText.textContent = 'NICE SHOT!';
+            updateShotIndicator(appState.currentShotIndex);
+            drawLivePreview(); 
+        } else {
+            updateShotIndicator(totalShots);
+            instructionsText.textContent = 'ALL DONE! GENERATING PREVIEW...';
+            
+            drawLivePreview(); 
+            stopLivePreviewLoop(); 
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await showPreviewScreen();
+        }
+    }
+
+    function drawImageCropped(ctx, img, dx, dy, dw, dh) {
+        const imgRatio = (img.videoWidth || img.width) / (img.videoHeight || img.height);
+        const boxRatio = dw / dh;
+        let sw = (img.videoWidth || img.width);
+        let sh = (img.videoHeight || img.height);
+        let sx = 0, sy = 0;
+        
+        if (imgRatio > boxRatio) {
+            sw = sh * boxRatio;
+            sx = ((img.videoWidth || img.width) - sw) / 2;
+        } else {
+            sh = sw / boxRatio;
+            sy = ((img.videoHeight || img.height) - sh) / 2;
+        }
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+
+    async function generateInitialPrintPreview() {
+        const config = layoutConfig[appState.layout];
+        const printCtx = finalCanvas.getContext('2d');
+        const DPI = 300;
+        finalCanvas.width = config.w * DPI;
+        finalCanvas.height = config.h * DPI;
+        printCtx.fillStyle = 'white';
+        printCtx.fillRect(0,0, finalCanvas.width, finalCanvas.height);
+        
+        appState.staticShotImages.forEach((img, i) => {
+            const g = config.guides[i];
+            if(g) drawImageCropped(printCtx, img, finalCanvas.width * g.x, finalCanvas.height * g.y, finalCanvas.width * g.w, finalCanvas.height * g.h);
+        });
+        printPreviewContainer.innerHTML = `<img src="${finalCanvas.toDataURL('image/png')}" alt="Print Preview" class="max-w-full max-h-full object-contain mx-auto rounded shadow-lg border border-gray-800"/>`;
+    }
+
+    async function showPreviewScreen() {
+        stopLivePreviewLoop(); 
+        showScreen('preview');
+        await generateInitialPrintPreview();
+        stopCamera();
+    }
+    
+    async function updateFramePreview() {
+        const config = layoutConfig[appState.layout];
+        const ctx = framePreviewCanvas.getContext('2d');
+        
+        const parentWidth = framePreviewCanvas.parentElement.clientWidth;
+        if (parentWidth === 0) {
+            setTimeout(updateFramePreview, 100); 
+            return;
+        }
+        const canvasW = parentWidth;
+        const canvasH = parentWidth / (config.w / config.h);
+        framePreviewCanvas.width = canvasW * 2; 
+        framePreviewCanvas.height = canvasH * 2;
+        framePreviewCanvas.style.height = `${canvasH}px`;
+        framePreviewCanvas.style.width = `${canvasW}px`;
+        
+        drawFrameBackground(ctx, framePreviewCanvas.width, framePreviewCanvas.height, appState.frameStyle, appState.frameColor);
+        
+        ctx.filter = appState.frameFilter || 'none';
+        appState.staticShotImages.forEach((img, i) => {
+            const g = config.guides[i];
+            if(g) drawImageCropped(ctx, img, framePreviewCanvas.width * g.x, framePreviewCanvas.height * g.y, framePreviewCanvas.width * g.w, framePreviewCanvas.height * g.h);
+        });
+        ctx.filter = 'none'; 
+        
+        if (appState.frameImage) {
+            ctx.drawImage(appState.frameImage, 0, 0, framePreviewCanvas.width, framePreviewCanvas.height);
+        }
+
+        if (appState.logoImage) {
+            let logoH_percent = 0.08; 
+            let logoY_percent = 0.02; 
+            
+            if (appState.layout === 'spotlight-3' || appState.layout === 'grid-6-landscape') {
+                logoH_percent = 0.18; 
+                logoY_percent = 0.01; 
+            }
+
+            const logoH = framePreviewCanvas.height * logoH_percent; 
+            const logoAspect = appState.logoImage.width / appState.logoImage.height;
+            const logoW = logoH * logoAspect;
+            const logoX = (framePreviewCanvas.width - logoW) / 2;
+            const logoY = framePreviewCanvas.height - logoH - (framePreviewCanvas.height * logoY_percent); 
+            
+            ctx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
+        }
+    }
+
+    async function generateAndSaveVideo(baseFilename) {
+        console.log('Starting Video generation...');
+        savingStatusMessage.textContent = 'GENERATING VIDEO...';
+
+        return new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch('admin/save_image.php', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-                    body: 'imageData=' + encodeURIComponent(appState.finalImage) 
-                });
+                const config = layoutConfig[appState.layout];
                 
-                if (!response.ok) throw new Error('Server error during print save');
-                const rawResponse = await response.text();
+                const VIDEO_WIDTH = 720; 
+                const VIDEO_HEIGHT = VIDEO_WIDTH / (config.w / config.h);
+
+                const vidCanvas = document.createElement('canvas');
+                vidCanvas.width = VIDEO_WIDTH;
+                vidCanvas.height = VIDEO_HEIGHT;
+                const ctx = vidCanvas.getContext('2d');
+
+                const bgCanvas = document.createElement('canvas');
+                bgCanvas.width = VIDEO_WIDTH;
+                bgCanvas.height = VIDEO_HEIGHT;
+                const bgCtx = bgCanvas.getContext('2d');
                 
-                if (rawResponse && rawResponse.startsWith('uploads/')) {
-                    
-                    appState.fileUrl = rawResponse; 
-                    
-                    await fetch('admin/use_session.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'layout=' + encodeURIComponent(appState.currentSessionLayout)
-                    });
-
-                    // *** ITO ANG UNANG BINAGO ***
-                    // Pagkatapos ma-save ang session sa server,
-                    // alisin na rin natin ito sa local array
-                    const usedLayoutIndex = appState.sessionLayouts.indexOf(appState.currentSessionLayout);
-                    if (usedLayoutIndex > -1) {
-                        appState.sessionLayouts.splice(usedLayoutIndex, 1);
-                    }
-                    // *** WAKAS NG UNANG BINAGO ***
-
-                    const baseFilename = appState.fileUrl.split('/').pop(); 
-                    await generateAndSaveGIF(baseFilename);
-
-                } else {
-                    throw new Error(rawResponse || 'Failed to get file URL from PHP');
-                }
-
-            } catch (error) {
-                console.error('Error during save process:', error);
-                savingStatusMessage.textContent = 'Error saving files.';
-                qrCodeContainer.innerHTML = 'Error';
-            }
-            
-            await showFinalPreviewScreen(appState.fileUrl);
-        }
-
-        async function showFinalPreviewScreen(fileUrl) {
-            stopAnimation(); 
-            
-            resultPrintContainer.innerHTML = `<img src="${appState.finalImage}" alt="Final Print" class="max-w-full max-h-full object-contain mx-auto rounded-md"/>`;
-            
-            if (fileUrl) { 
-                savingStatusMessage.textContent = 'Saved!';
-                
-                const filename = fileUrl.split('/').pop(); 
-                const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-                const qrUrl = `${baseUrl}/view.php?image=${filename}`;
-                
-                console.log("Generating QR Code for URL:", qrUrl); 
-                
-                generateQRCode(qrUrl, qrCodeContainer);
-
-            } else {
-                savingStatusMessage.textContent = 'Save failed.';
-                qrCodeContainer.innerHTML = 'Error';
-            }
-            
-            resultBoomerangContainer.innerHTML = `<canvas id="result-boomerang-canvas"></canvas>`;
-            
-            showResultTab('boomerang'); 
-            await generateFinalBoomerang();
-        }
-
-        async function generateFinalBoomerang() {
-            const boomerangCanvas = document.getElementById('result-boomerang-canvas');
-            if (!boomerangCanvas) return;
-            
-            const config = layoutConfig[appState.layout];
-            const container = resultBoomerangContainer;
-            
-            await waitForElementVisible(container);
-            
-            const containerW = container.clientWidth;
-            const containerH = container.clientHeight;
-            if (containerW === 0 || containerH === 0) {
-                return;
-            }
-            const layoutRatio = config.w / config.h;
-
-            let canvasW = containerW;
-            let canvasH = containerW / layoutRatio;
-            if (canvasH > containerH) {
-                canvasH = containerH;
-                canvasW = containerH * layoutRatio;
-            }
-
-            boomerangCanvas.style.width = `${canvasW}px`;
-            boomerangCanvas.style.height = `${canvasH}px`;
-            boomerangCanvas.width = canvasW * 2; 
-            boomerangCanvas.height = canvasH * 2;
-            
-            const boomerangCtx = boomerangCanvas.getContext('2d');
-            const allFrameImages = await Promise.all(appState.boomerangCollections.map(collection => 
-                Promise.all(collection.map(src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = src; })))
-            ));
-            
-            let frameIndex = 0;
-            let direction = 1;
-            const longestCollectionLength = Math.max(0, ...allFrameImages.map(c => c.length));
-            
-            let frameSequence = [];
-            for (let i = 0; i < longestCollectionLength; i++) { frameSequence.push(i); }
-            for (let i = longestCollectionLength - 2; i > 0; i--) { frameSequence.push(i); }
-            
-            let sequenceIndex = 0;
-
-            appState.animationIntervalId = setInterval(() => {
-                if(!longestCollectionLength) return;
-
-                const frameIndex = frameSequence[sequenceIndex];
-                
-                if (appState.frameColor) {
-                    boomerangCtx.fillStyle = appState.frameColor;
-                    boomerangCtx.fillRect(0, 0, boomerangCanvas.width, boomerangCanvas.height);
-                } else {
-                    boomerangCtx.fillStyle = 'white';
-                    boomerangCtx.fillRect(0, 0, boomerangCanvas.width, boomerangCanvas.height);
-                }
-                
-                boomerangCtx.filter = appState.frameFilter || 'none';
-                config.guides.forEach((g, i) => {
-                    const currentCollection = allFrameImages[i];
-                    if (currentCollection && currentCollection.length > 0) {
-                        const img = currentCollection[frameIndex % currentCollection.length];
-                        drawImageCropped(boomerangCtx, img, boomerangCanvas.width * g.x, boomerangCanvas.height * g.y, boomerangCanvas.width * g.w, boomerangCanvas.height * g.h);
-                    }
-                });
-                boomerangCtx.filter = 'none';
-
-                if (appState.frameImage) {
-                    boomerangCtx.drawImage(appState.frameImage, 0, 0, boomerangCanvas.width, boomerangCanvas.height);
-                }
+                drawFrameBackground(bgCtx, VIDEO_WIDTH, VIDEO_HEIGHT, appState.frameStyle, appState.frameColor);
 
                 if (appState.logoImage) {
                     let logoH_percent = 0.08; 
@@ -1116,137 +1324,403 @@
                         logoY_percent = 0.01; 
                     }
 
-                    const logoH = boomerangCanvas.height * logoH_percent; 
+                    const logoH = VIDEO_HEIGHT * logoH_percent; 
                     const logoAspect = appState.logoImage.width / appState.logoImage.height;
                     const logoW = logoH * logoAspect;
-                    const logoX = (boomerangCanvas.width - logoW) / 2;
-                    const logoY = boomerangCanvas.height - logoH - (boomerangCanvas.height * logoY_percent); 
+                    const logoX = (VIDEO_WIDTH - logoW) / 2;
+                    const logoY = VIDEO_HEIGHT - logoH - (VIDEO_HEIGHT * logoY_percent); 
                     
-                    boomerangCtx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
+                    bgCtx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
                 }
 
-                sequenceIndex = (sequenceIndex + 1) % frameSequence.length;
+                const allFrameImages = await Promise.all(
+                    appState.boomerangCollections.map(collection => 
+                        Promise.all(collection.map(src => new Promise(res => { 
+                            const i = new Image(); 
+                            i.onload = () => res(i); 
+                            i.src = src; 
+                        })))
+                    )
+                );
                 
-            }, 80); 
-        }
+                const longestCollectionLength = Math.max(0, ...allFrameImages.map(c => c.length));
+                if (longestCollectionLength === 0) throw new Error("No frames found for Video.");
 
-        function showResultTab(tabName) {
-            stopAnimation(); 
-            if (tabName === 'boomerang') {
-                resultBoomerangContainer.style.display = 'flex';
-                resultPrintContainer.style.display = 'none';
-                resultBoomerangTab.classList.add('active');
-                resultPrintTab.classList.remove('active');
-                generateFinalBoomerang(); 
-            } else { 
-                resultBoomerangContainer.style.display = 'none';
-                resultPrintContainer.style.display = 'flex';
-                resultBoomerangTab.classList.remove('active');
-                resultPrintTab.classList.add('active');
-            }
-        }
+                let frameSequence = [];
+                for (let i = 0; i < longestCollectionLength; i++) { frameSequence.push(i); }
+                for (let i = longestCollectionLength - 2; i > 0; i--) { frameSequence.push(i); }
 
-        function generateQRCode(url, container) {
-            try {
-                if (typeof qrcode === 'undefined') {
-                    throw new Error("qrcode.js library is not loaded. Check path: js/qrcode.js");
+                let mimeType = 'video/webm';
+                if (MediaRecorder.isTypeSupported("video/mp4")) {
+                    mimeType = "video/mp4";
+                } else if (MediaRecorder.isTypeSupported("video/webm;codecs=h264")) {
+                    mimeType = "video/webm;codecs=h264";
+                } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+                    mimeType = "video/webm;codecs=vp9";
                 }
+
+                const stream = vidCanvas.captureStream(30); 
+                const recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: 2500000 });
                 
-                console.log("Attempting to generate QR for URL:", url); 
-                
-                container.innerHTML = ''; 
-                const typeNumber = 0; 
-                const errorCorrectionLevel = 'L'; 
-                const qr = qrcode(typeNumber, errorCorrectionLevel);
-                qr.addData(url);
-                qr.make();
-                
-                const imgTag = qr.createImgTag(8, 2); 
-                
-                const imgEl = document.createElement('div');
-                imgEl.innerHTML = imgTag;
-                const qrImage = imgEl.firstChild;
-                
-                qrImage.style.width = '100%';
-                qrImage.style.height = 'auto';
-                qrImage.style.imageRendering = 'pixelated'; 
-                
-                container.appendChild(qrImage);
-                
-            } catch (e) {
-                console.error('QR Code generation FAILED:', e.message); 
-                container.innerHTML = 'QR Error. Check Console (F12).';
-            }
-        }
+                const chunks = [];
+                recorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
 
-
-        layoutButtons.forEach(b => b.addEventListener('click', () => { 
-            appState.currentSessionLayout = b.dataset.layout; 
-            appState.layout = b.dataset.layout; 
-            appState.retriesLeft = MAX_RETRIES; 
-            setupBooth(); 
-        }));
-
-        retakeBtn.addEventListener('click', () => {
-            stopAnimation();
-            if (appState.retriesLeft > 0) {
-                appState.retriesLeft--;
-                setupBooth(); 
-            }
-        });
-
-        confirmFrameBtn.addEventListener('click', async () => {
-            stopAnimation();
-            stopCamera();
-            await loadFramesForSelection(); 
-        });
-
-        backToPreviewBtn.addEventListener('click', () => {
-            showPreviewScreen(); 
-        });
-
-        confirmSaveBtn.addEventListener('click', generateAndSaveFinalImage);
-
-        // *** ITO ANG PANGALAWANG BINAGO ***
-        nextSessionBtn.addEventListener('click', () => {
-            stopAnimation(); 
-            showScreen('start');     // Ibalik sa start screen
-            updateStartScreen(); // I-refresh ang bilang sa start screen gamit ang bagong listahan
-        });
-
-        resultBoomerangTab.addEventListener('click', () => showResultTab('boomerang'));
-        resultPrintTab.addEventListener('click', () => showResultTab('print'));
-        
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const fullscreenIcon = document.getElementById('fullscreen-icon');
-        const minimizeIcon = document.getElementById('minimize-icon');
-
-        if (fullscreenBtn && fullscreenIcon && minimizeIcon) {
-            fullscreenBtn.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`Error sa pag-fullscreen: ${err.message} (${err.name})`);
-                    });
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
+                recorder.onstop = () => {
+                    console.log('Video recording finished.');
+                    
+                    const blob = new Blob(chunks, { type: mimeType });
+                    
+                    appState.localVideoBlobUrl = URL.createObjectURL(blob);
+                    console.log("Generated local blob URL:", appState.localVideoBlobUrl);
+                    
+                    savingStatusMessage.textContent = 'GENERATED QR CODE';
+                    const formData = new FormData();
+                    
+                    let fileExtension = '.webm';
+                    if (mimeType.includes('mp4')) {
+                        fileExtension = '.mp4';
                     }
+                    
+                    const videoFilename = baseFilename.replace(/\.[^/.]+$/, "") + fileExtension;
+                    
+                    formData.append('filename', videoFilename); 
+                    formData.append('videoData', blob, videoFilename);
+
+                    fetch('admin/save_video.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to save Video on server.');
+                        return response.text();
+                    })
+                    .then(text => {
+                        console.log("Upload success:", text);
+                        appState.videoUrl = "uploads/" + videoFilename; 
+                        
+                        if (!document.getElementById('result-screen').classList.contains('hidden')) {
+                            savingStatusMessage.textContent = 'SAVED!';
+                        }
+                        resolve(); 
+                    })
+                    .catch(err => {
+                        console.error("Upload failed but local preview works:", err);
+                        reject(err); 
+                    }); 
+                };
+
+                recorder.start();
+
+                let sequenceIndex = 0;
+                let loopCount = 0;
+                const maxLoops = 3;
+                const fps = 15;
+                const interval = 1000 / fps;
+
+                function drawFrame() {
+                    if (loopCount >= maxLoops) {
+                        recorder.stop();
+                        return;
+                    }
+
+                    const frameIndex = frameSequence[sequenceIndex];
+
+                    ctx.drawImage(bgCanvas, 0, 0);
+
+                    ctx.filter = appState.frameFilter || 'none';
+                    config.guides.forEach((g, i) => {
+                        const currentCollection = allFrameImages[i];
+                        if (currentCollection && currentCollection.length > 0) {
+                            const img = currentCollection[frameIndex % currentCollection.length];
+                            drawImageCropped(ctx, img, vidCanvas.width * g.x, vidCanvas.height * g.y, vidCanvas.width * g.w, vidCanvas.height * g.h);
+                        }
+                    });
+                    ctx.filter = 'none';
+
+                    if (appState.frameImage) {
+                        ctx.drawImage(appState.frameImage, 0, 0, vidCanvas.width, vidCanvas.height);
+                    }
+
+                    sequenceIndex++;
+                    if (sequenceIndex >= frameSequence.length) {
+                        sequenceIndex = 0;
+                        loopCount++;
+                    }
+
+                    setTimeout(drawFrame, interval);
                 }
-            });
-            document.addEventListener('fullscreenchange', () => {
-                if (document.fullscreenElement) {
-                    fullscreenIcon.classList.add('hidden');
-                    minimizeIcon.classList.remove('hidden');
-                } else {
-                    fullscreenIcon.classList.remove('hidden');
-                    minimizeIcon.classList.add('hidden');
-                }
-            });
+
+                drawFrame();
+
+            } catch (err) {
+                reject(err); 
+            }
+        });
+    }
+
+    async function generateAndSaveFinalImage() {
+        savingStatusMessage.textContent = 'SAVING IMAGE...';
+        qrCodeContainer.innerHTML = '...';
+        
+        await new Promise(resolve => setTimeout(resolve, 100)); 
+
+        const config = layoutConfig[appState.layout];
+        const printCtx = finalCanvas.getContext('2d');
+        const DPI = 300;
+        finalCanvas.width = config.w * DPI;
+        finalCanvas.height = config.h * DPI;
+        
+        drawFrameBackground(printCtx, finalCanvas.width, finalCanvas.height, appState.frameStyle, appState.frameColor);
+        
+        printCtx.filter = appState.frameFilter || 'none';
+        appState.staticShotImages.forEach((img, i) => {
+            const g = config.guides[i];
+            if(g) drawImageCropped(printCtx, img, finalCanvas.width * g.x, finalCanvas.height * g.y, finalCanvas.width * g.w, finalCanvas.height * g.h);
+        });
+        printCtx.filter = 'none';
+        
+        if (appState.frameImage) {
+            printCtx.drawImage(appState.frameImage, 0, 0, finalCanvas.width, finalCanvas.height);
         }
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        if (appState.logoImage) {
+            let logoH_percent = 0.08; 
+            let logoY_percent = 0.02; 
+            
+            if (appState.layout === 'spotlight-3' || appState.layout === 'grid-6-landscape') {
+                logoH_percent = 0.18; 
+                logoY_percent = 0.01; 
+            }
 
-    </script>
+            const logoH = finalCanvas.height * logoH_percent; 
+            const logoAspect = appState.logoImage.width / appState.logoImage.height;
+            const logoW = logoH * logoAspect;
+            const logoX = (finalCanvas.width - logoW) / 2;
+            const logoY = finalCanvas.height - logoH - (finalCanvas.height * logoY_percent); 
+            
+            printCtx.drawImage(appState.logoImage, logoX, logoY, logoW, logoH);
+        }
+
+        appState.finalImage = finalCanvas.toDataURL('image/png');
+        appState.fileUrl = null; 
+        
+        savingStatusMessage.textContent = 'UPLOADING...';
+
+        try {
+            const response = await fetch('admin/save_image.php', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                body: 'imageData=' + encodeURIComponent(appState.finalImage) 
+            });
+            
+            if (!response.ok) throw new Error('Server error during print save');
+            const rawResponse = await response.text();
+            
+            if (rawResponse && rawResponse.startsWith('uploads/')) {
+                
+                appState.fileUrl = rawResponse; 
+                
+                await fetch('admin/use_session.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'layout=' + encodeURIComponent(appState.currentSessionLayout)
+                });
+
+                const usedLayoutIndex = appState.sessionLayouts.indexOf(appState.currentSessionLayout);
+                if (usedLayoutIndex > -1) {
+                    appState.sessionLayouts.splice(usedLayoutIndex, 1);
+                }
+
+                const baseFilename = appState.fileUrl.split('/').pop(); 
+                
+                await generateAndSaveVideo(baseFilename);
+
+            } else {
+                throw new Error(rawResponse || 'Failed to get file URL from PHP');
+            }
+
+        } catch (error) {
+            console.error('Error during save process:', error);
+            savingStatusMessage.textContent = 'ERROR SAVING.';
+            qrCodeContainer.innerHTML = 'Error';
+        }
+        
+        await showFinalPreviewScreen(appState.fileUrl);
+    }
+
+    async function showFinalPreviewScreen(fileUrl) {
+        showScreen('result'); 
+        
+        resultPrintContainer.innerHTML = `<img src="${appState.finalImage}" alt="Final Print" class="max-w-full max-h-full object-contain mx-auto rounded shadow-lg border border-gray-800"/>`;
+        
+        if (fileUrl) { 
+            
+            const filename = fileUrl.split('/').pop(); 
+            const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+            const qrUrl = `${baseUrl}/view.php?image=${filename}`;
+            
+            generateQRCode(qrUrl, qrCodeContainer);
+
+        } else {
+            savingStatusMessage.textContent = 'SAVE FAILED.';
+            qrCodeContainer.innerHTML = 'Error';
+        }
+        
+        if (appState.localVideoBlobUrl) {
+             resultBoomerangContainer.innerHTML = `
+                <video id="result-video" autoplay loop playsinline muted 
+                       class="max-w-full max-h-full object-contain mx-auto rounded-md shadow-lg border border-gray-800 bg-black">
+                    <source src="${appState.localVideoBlobUrl}" type="video/webm">
+                    <source src="${appState.localVideoBlobUrl}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>`;
+                
+             const vid = document.getElementById('result-video');
+             vid.play().catch(e => console.log("Autoplay blocked", e));
+             
+        } else if (appState.videoUrl) {
+             const timestamp = new Date().getTime();
+             const videoSrcWithCache = `${appState.videoUrl}?t=${timestamp}`;
+             
+             resultBoomerangContainer.innerHTML = `
+                <video id="result-video" autoplay loop playsinline muted 
+                       class="max-w-full max-h-full object-contain mx-auto rounded-md shadow-lg border border-gray-800 bg-black">
+                    <source src="${videoSrcWithCache}" type="video/webm">
+                    <source src="${videoSrcWithCache}" type="video/mp4">
+                </video>`;
+        } else {
+             resultBoomerangContainer.innerHTML = '<p class="text-red-400 font-bold">BOOMERANG FAILED.</p>';
+        }
+        
+        showResultTab('boomerang'); 
+    }
+
+    function showResultTab(tabName) {
+        if (tabName === 'boomerang') {
+            resultBoomerangContainer.classList.remove('hidden');
+            resultBoomerangContainer.classList.add('flex');
+
+            resultPrintContainer.classList.add('hidden');
+            resultPrintContainer.classList.remove('flex');
+
+            resultBoomerangTab.classList.add('active');
+            resultPrintTab.classList.remove('active');
+            
+            const vid = resultBoomerangContainer.querySelector('video');
+            if(vid) vid.play().catch(e=>{});
+
+        } else { 
+            resultBoomerangContainer.classList.add('hidden');
+            resultBoomerangContainer.classList.remove('flex');
+
+            resultPrintContainer.classList.remove('hidden');
+            resultPrintContainer.classList.add('flex');
+
+            resultBoomerangTab.classList.remove('active');
+            resultPrintTab.classList.add('active');
+            
+            const vid = resultBoomerangContainer.querySelector('video');
+            if(vid) vid.pause();
+        }
+    }
+
+    function generateQRCode(url, container) {
+        try {
+            if (typeof qrcode === 'undefined') {
+                throw new Error("qrcode.js library is not loaded. Check path: js/qrcode.js");
+            }
+            
+            console.log("Attempting to generate QR for URL:", url); 
+            
+            container.innerHTML = ''; 
+            const typeNumber = 0; 
+            const errorCorrectionLevel = 'L'; 
+            const qr = qrcode(typeNumber, errorCorrectionLevel);
+            qr.addData(url);
+            qr.make();
+            
+            const imgTag = qr.createImgTag(6, 0); 
+            
+            const imgEl = document.createElement('div');
+            imgEl.innerHTML = imgTag;
+            const qrImage = imgEl.firstChild;
+            
+            qrImage.style.width = '100%';
+            qrImage.style.height = 'auto';
+            qrImage.style.imageRendering = 'pixelated'; 
+            
+            container.appendChild(qrImage);
+            
+        } catch (e) {
+            console.error('QR Code generation FAILED:', e.message); 
+            container.innerHTML = 'QR Error';
+        }
+    }
+
+    layoutButtons.forEach(b => b.addEventListener('click', () => { 
+        appState.currentSessionLayout = b.dataset.layout; 
+        appState.layout = b.dataset.layout; 
+        appState.retriesLeft = MAX_RETRIES; 
+        setupBooth(); 
+    }));
+
+    retakeBtn.addEventListener('click', () => {
+        stopLivePreviewLoop();
+        if (appState.retriesLeft > 0) {
+            appState.retriesLeft--;
+            setupBooth(); 
+        }
+    });
+
+    confirmFrameBtn.addEventListener('click', async () => {
+        stopLivePreviewLoop();
+        stopCamera();
+        await loadFramesForSelection(); 
+    });
+
+    backToPreviewBtn.addEventListener('click', () => {
+        showPreviewScreen(); 
+    });
+
+    confirmSaveBtn.addEventListener('click', async () => {
+        showScreen('loading');
+        await new Promise(resolve => setTimeout(resolve, 50));
+        await generateAndSaveFinalImage();
+    });
+
+    nextSessionBtn.addEventListener('click', () => {
+        showScreen('start');
+        updateStartScreen();
+    });
+
+    resultBoomerangTab.addEventListener('click', () => showResultTab('boomerang'));
+    resultPrintTab.addEventListener('click', () => showResultTab('print'));
     
-</body>
-</html>
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+</script>
+<script>
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+document.onkeydown = function(e) {
+    if(e.keyCode == 123) {
+        return false;
+    }
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+        return false;
+    }
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
+        return false;
+    }
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+        return false;
+    }
+    if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+        return false;
+    }
+}
+</script> </body> </html>

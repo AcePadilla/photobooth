@@ -1,120 +1,132 @@
 <?php
-session_start();
-require_once 'db.php';
+ob_start(); // 1. I-buffer ang output para gumana ang header redirect kahit may spaces
 
+// 2. Gamitin ang session_config.php para match sa settings ng dashboard
+// Kung wala kang session_config.php, ibalik mo sa session_start();
+require_once 'session_config.php'; 
+
+require_once 'db.php'; 
+
+// --- SECURITY HEADERS ---
+header("X-Frame-Options: DENY");
+header("X-XSS-Protection: 1; mode=block");
+header("X-Content-Type-Options: nosniff");
+
+// Generate CSRF Token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token'];
 
+// --- CONFIGURATION ---
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_TIME = 300;
+const LOCKOUT_TIME = 300; 
 
-if (!isset($_SESSION['login_attempts'])) {
-    $_SESSION['login_attempts'] = 0;
-}
-if (!isset($_SESSION['last_attempt_time'])) {
-    $_SESSION['last_attempt_time'] = 0;
-}
+if (!isset($_SESSION['login_attempts'])) $_SESSION['login_attempts'] = 0;
+if (!isset($_SESSION['last_attempt_time'])) $_SESSION['last_attempt_time'] = 0;
 
 $error_message = '';
 $submitted_email = '';
 
+// --- RATE LIMIT CHECK ---
 $time_since_last_attempt = time() - $_SESSION['last_attempt_time'];
-if ($_SESSION['login_attempts'] >= MAX_LOGIN_ATTEMPTS && $time_since_last_attempt < LOCKOUT_TIME) {
-    $remaining_time = LOCKOUT_TIME - $time_since_last_attempt;
-    $error_message = "Masyado nang maraming maling attempt. Subukan ulit pagkatapos ng " . ceil($remaining_time / 60) . " minuto(s).";
-} 
-else if ($time_since_last_attempt >= LOCKOUT_TIME) {
-    $_SESSION['login_attempts'] = 0;
+
+if ($_SESSION['login_attempts'] >= MAX_LOGIN_ATTEMPTS) {
+    if ($time_since_last_attempt < LOCKOUT_TIME) {
+        $remaining_time = ceil((LOCKOUT_TIME - $time_since_last_attempt) / 60);
+        $error_message = "Too many failed attempts. Please try again in " . $remaining_time . " minute(s).";
+    } else {
+        $_SESSION['login_attempts'] = 0;
+        $_SESSION['last_attempt_time'] = 0;
+    }
 }
 
+// --- LOGIN PROCESS ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($error_message)) {
     if (!isset($_POST['csrf_token']) || !hash_equals($csrf_token, $_POST['csrf_token'])) {
-        $error_message = 'Invalid request. Subukang i-refresh ang page.';
+        $error_message = 'Security Token Expired. Please refresh the page.';
     } else {
-        $email = trim($_POST['email'] ?? '');
+        $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
         $password = $_POST['password'] ?? '';
         $submitted_email = $email;
-        
+
         try {
-            $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ?");
+            $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($user && password_verify($password, $user['password_hash'])) {
-                $_SESSION['login_attempts'] = 0;
-                unset($_SESSION['last_attempt_time']);
-                
+                // SUCCESS
                 session_regenerate_id(true);
+                $_SESSION['login_attempts'] = 0;
+                $_SESSION['last_attempt_time'] = 0;
                 
+                // Set Session Variables
+                $_SESSION['user_id'] = $user['id']; // Important: Ito ang chinecheck sa session_config.php
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['admin_email'] = $user['email'];
-                $_SESSION['admin_id'] = $user['id'];
                 
+                // 3. I-save at isara ang session bago mag-redirect para sigurado
+                session_write_close(); 
+                
+                // 4. Redirect
                 header('Location: dashboard.php');
+                ob_end_flush(); // I-flush ang buffer
                 exit;
-            
+
             } else {
+                // FAIL
                 $_SESSION['login_attempts']++;
                 $_SESSION['last_attempt_time'] = time();
-                $error_message = 'Invalid email or password.';
+                $error_message = 'Incorrect email or password.';
             }
-        
         } catch (PDOException $e) {
-            $error_message = 'Nagkaroon ng error sa system. Pakisubukang muli.';
+            error_log("Login Database Error: " . $e->getMessage());
+            $error_message = 'System error. Please try again later.';
         }
     }
 }
-?>
+?>  
 
 <!DOCTYPE html>
-<html lang="tl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    
+    <title>Admin Login - Marahuyo</title>
     <link rel="icon" type="image/jpeg" href="../public/images/marahuyologo.jpg">
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            /* ✅ UI/UX IMPROVEMENT: Subtle gradient background */
-            background-image: radial-gradient(circle at center, #111827, #030712);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        main {
-            animation: fadeIn 0.5s ease-out;
-        }
-    </style>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        'brand-red': {
-                            DEFAULT: '#DC2626',
-                            light: '#F87171',
-                            dark: '#991B1B',
+                        brand: { 
+                            red: '#DC2626', 
+                            dark: '#111827', 
+                            surface: '#1F2937' 
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
-                        'brand-dark': {
-                            light: '#374151',
-                            DEFAULT: '#1F2937',
-                            dark: '#111827',
-                            darkest: '#030712',
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
                         }
                     }
                 }
@@ -122,97 +134,121 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($error_message)) {
         }
     </script>
 </head>
-<body class="text-gray-300 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen relative overflow-hidden selection:bg-brand-red selection:text-white">
 
-    <main class="w-full max-w-4xl mx-auto bg-brand-dark/70 backdrop-blur-sm border border-gray-700/50 rounded-lg shadow-2xl overflow-hidden md:flex">
-        
-        <div class="md:w-1/2 p-8 sm:p-12 bg-brand-dark/80 flex flex-col justify-center items-center">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-red/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <main class="relative z-10 w-full max-w-md p-6 mx-4 animate-fade-in">
+        <div class="bg-brand-surface/80 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
             
-            <img src="../public/images/marahuyologo.jpg" alt="Marahuyo Logo" 
-                 class="w-32 h-32 rounded-full object-cover shadow-lg border-2 border-brand-dark-light transition-transform duration-300 hover:scale-105">
-            
-            <h2 class="text-2xl font-bold text-white text-center mt-6">Admin Panel</h2>
-            <p class="text-gray-400 text-center mt-2">Secure Management Portal</p>
-        </div>
-
-        <div class="w-full md:w-1/2 p-8 sm:p-12">
-            <h1 class="text-3xl font-bold text-white text-center mb-6">Admin Login</h1>
-
-            <?php if (!empty($error_message)): ?>
-                <div class="bg-red-900/50 border border-red-700 text-red-100 p-3 rounded-lg mb-4 text-center text-sm">
-                    <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
-                </div>
-            <?php endif; ?>
-
-            <form id="loginForm" action="login.php" method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                
-                <div class="mb-4">
-                    <label for="email" class="block mb-2 text-sm font-medium text-gray-300">Email</label>
-                    <input type="email" name="email" id="email" 
-                           class="bg-brand-dark-light/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-brand-red focus:border-brand-red block w-full p-2.5 transition-colors" 
-                           value="<?php echo htmlspecialchars($submitted_email, ENT_QUOTES, 'UTF-8'); ?>" required>
-                </div>
-                
-                <div class="mb-6">
-                    <label for="password" class="block mb-2 text-sm font-medium text-gray-300">Password</label>
-                    
-                    <div class="relative">
-                        <input type="password" name="password" id="password" 
-                               class="bg-brand-dark-light/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-brand-red focus:border-brand-red block w-full p-2.5 pr-10 transition-colors" required>
-                        
-                        <span id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-red-300 transition-colors">
-                            <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <svg id="eye-slashed-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 .987-3.14 3.635-5.515 6.84-6.318M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.125 7.125A9.953 9.953 0 003.542 12c1.274 4.057 5.064 7 9.542 7 1.48 0 2.89-.32 4.192-.88M21.542 12c-1.274-4.057-5.064-7-9.542-7a9.953 9.953 0 00-2.333.318m-3.09 3.09A9.953 9.953 0 0012 5c4.478 0 8.268 2.943 9.542 7a9.953 9.953 0 01-1.07 2.067M1 1l22 22"></path></svg>
-                        </span>
+            <div class="p-8">
+                <div class="text-center mb-8">
+                    <div class="inline-block p-1 rounded-full bg-gradient-to-tr from-brand-red to-orange-500 mb-4 shadow-lg shadow-brand-red/20">
+                         <img src="../public/images/marahuyologo.jpg" alt="Logo" class="w-16 h-16 rounded-full border-2 border-gray-800 object-cover">
                     </div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Welcome Back</h1>
+                    <p class="text-gray-400 text-sm mt-1">Sign in to manage the dashboard</p>
                 </div>
-                
-                <button id="loginButton" type="submit" 
-                        class="w-full text-white bg-brand-red hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-900 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-200 
-                               disabled:bg-red-900 disabled:text-gray-400 
-                               hover:shadow-lg hover:shadow-brand-red/30 hover:-translate-y-0.5"
-                        <?php if (!empty($error_message) && str_contains($error_message, 'Masyado nang maraming')) { echo 'disabled'; } ?>>
-                    
-                    <span id="buttonText">Log In</span>
-                    <svg id="buttonSpinner" aria-hidden="true" role="status" class="hidden inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#374151"/><path d="M93.9676 39.0409C96.393 38.0416 97.8624 35.2111 97.0053 32.7758C96.1482 30.3405 93.6565 28.6943 91.0939 29.349C88.5312 30.0037 86.9589 32.551 87.816 34.9863C88.6732 37.4216 91.5422 39.0409 93.9676 39.0409Z" fill="currentColor"/></svg>
-                </button>
-            </form>
+
+                <?php if (!empty($error_message)): ?>
+                    <div class="animate-shake mb-6 flex items-center p-4 text-sm text-red-200 border border-red-800 rounded-lg bg-red-900/30" role="alert">
+                        <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                        </svg>
+                        <span class="font-medium"><?php echo htmlspecialchars($error_message); ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <form id="loginForm" action="" method="POST" class="space-y-5">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+                                    <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
+                                    <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
+                                </svg>
+                            </div>
+                            <input type="email" name="email" id="email" required
+                                class="bg-gray-800/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-brand-red focus:border-brand-red block w-full ps-10 p-2.5 placeholder-gray-500 transition-all duration-200 focus:bg-gray-800" 
+                                placeholder="admin@marahuyo.com"
+                                value="<?php echo htmlspecialchars($submitted_email); ?>">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-300">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                    <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Z"/>
+                                </svg>
+                            </div>
+                            <input type="password" name="password" id="password" required
+                                class="bg-gray-800/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-brand-red focus:border-brand-red block w-full ps-10 p-2.5 pr-10 placeholder-gray-500 transition-all duration-200 focus:bg-gray-800" 
+                                placeholder="••••••••">
+                            
+                            <button type="button" id="togglePass" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-white focus:outline-none">
+                                <svg id="icon-eye" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <svg id="icon-eye-off" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 .987-3.14 3.635-5.515 6.84-6.318M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.125 7.125A9.953 9.953 0 003.542 12c1.274 4.057 5.064 7 9.542 7 1.48 0 2.89-.32 4.192-.88M21.542 12c-1.274-4.057-5.064-7-9.542-7a9.953 9.953 0 00-2.333.318m-3.09 3.09A9.953 9.953 0 0012 5c4.478 0 8.268 2.943 9.542 7a9.953 9.953 0 01-1.07 2.067M1 1l22 22"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmit"
+                        class="w-full text-white bg-brand-red hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-900 font-semibold rounded-lg text-sm px-5 py-3 text-center transition-all duration-200 shadow-lg shadow-brand-red/20 hover:shadow-brand-red/40 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
+                        <?php if (!empty($error_message) && strpos($error_message, 'Too many') !== false) echo 'disabled'; ?>>
+                        
+                        <span id="btnText">Sign In</span>
+                        <div id="btnLoader" class="hidden flex items-center justify-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Verifying...
+                        </div>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="bg-gray-800/50 border-t border-gray-700 p-4 text-center">
+                <p class="text-xs text-gray-500">&copy; <?php echo date('Y'); ?> Marahuyo System. Secure Access.</p>
+            </div>
         </div>
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const passwordInput = document.getElementById('password');
-            const togglePassword = document.getElementById('togglePassword');
-            const eyeIcon = document.getElementById('eye-icon');
-            const eyeSlashedIcon = document.getElementById('eye-slashed-icon');
+        // Password Toggle Logic
+        const toggleBtn = document.getElementById('togglePass');
+        const passInput = document.getElementById('password');
+        const iconEye = document.getElementById('icon-eye');
+        const iconEyeOff = document.getElementById('icon-eye-off');
 
-            if (togglePassword && passwordInput) {
-                togglePassword.addEventListener('click', function() {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-                    eyeIcon.classList.toggle('hidden');
-                    eyeSlashedIcon.classList.toggle('hidden');
-                });
-            }
+        toggleBtn.addEventListener('click', () => {
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+            iconEye.classList.toggle('hidden');
+            iconEyeOff.classList.toggle('hidden');
+        });
 
-            const loginForm = document.getElementById('loginForm');
-            const loginButton = document.getElementById('loginButton');
-            const buttonText = document.getElementById('buttonText');
-            const buttonSpinner = document.getElementById('buttonSpinner');
+        // Form Submission Animation
+        const form = document.getElementById('loginForm');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
 
-            if (loginForm && loginButton && buttonText && buttonSpinner) {
-                loginForm.addEventListener('submit', function(e) {
-                    if (loginButton.disabled) {
-                        e.preventDefault();
-                        return;
-                    }
-                    
-                    loginButton.disabled = true;
-                    buttonText.classList.add('hidden');
-                    buttonSpinner.classList.remove('hidden');
-                });
+        form.addEventListener('submit', function(e) {
+            // Don't prevent default unless invalid, we need the PHP post
+            if (form.checkValidity()) {
+                btnSubmit.disabled = true;
+                btnText.classList.add('hidden');
+                btnLoader.classList.remove('hidden');
+                // Just visual feedback, allow form to submit normally
             }
         });
     </script>

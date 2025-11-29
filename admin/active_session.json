@@ -1,4 +1,12 @@
 {
-    "layouts": [],
-    "startTime": 1763296861
+    "layouts": [
+        "strip-4",
+        "grid-4",
+        "spotlight-3",
+        "grid-6-portrait",
+        "grid-6-landscape",
+        "strip-3",
+        "strip-3"
+    ],
+    "startTime": 1763626224
 }

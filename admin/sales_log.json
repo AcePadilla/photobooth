@@ -1,0 +1,122 @@
+[
+    {
+        "timestamp": 1763542957,
+        "amount": 199,
+        "details": {
+            "strip-3": "1",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763543617,
+        "amount": 299,
+        "details": {
+            "strip-3": "0",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "1",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763546494,
+        "amount": 299,
+        "details": {
+            "strip-3": "0",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "1",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763546649,
+        "amount": 249,
+        "details": {
+            "strip-3": "0",
+            "strip-4": "1",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763546679,
+        "amount": 448,
+        "details": {
+            "strip-3": "1",
+            "strip-4": "1",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763551235,
+        "amount": 796,
+        "details": {
+            "strip-3": "4",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763565508,
+        "amount": 1843,
+        "details": {
+            "strip-3": "1",
+            "strip-4": "1",
+            "grid-4": "1",
+            "spotlight-3": "1",
+            "grid-6-portrait": "2",
+            "grid-6-landscape": "1"
+        }
+    },
+    {
+        "timestamp": 1763566024,
+        "amount": 1544,
+        "details": {
+            "strip-3": "1",
+            "strip-4": "1",
+            "grid-4": "1",
+            "spotlight-3": "1",
+            "grid-6-portrait": "1",
+            "grid-6-landscape": "1"
+        }
+    },
+    {
+        "timestamp": 1763566485,
+        "amount": 597,
+        "details": {
+            "strip-3": "3",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    },
+    {
+        "timestamp": 1763626224,
+        "amount": 597,
+        "details": {
+            "strip-3": "3",
+            "strip-4": "0",
+            "grid-4": "0",
+            "spotlight-3": "0",
+            "grid-6-portrait": "0",
+            "grid-6-landscape": "0"
+        }
+    }
+]
